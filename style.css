@@ -30,6 +30,12 @@ main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
   color: var(--text); text-decoration: none;
 }
 .brand span { color: var(--accent); font-weight: 800; }
+/* Logo 1: Q popper frem, og resten glider ind. Kun ved første visning. */
+.brand span { display: inline-block; animation: q-pop .6s ease-out both; }
+.brand b { display: inline-block; font-weight: inherit; animation: q-slide .6s ease-out .45s both; }
+@keyframes q-pop { 0% { transform: scale(0); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes q-slide { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .brand span, .brand b { animation: none; } }
 .top nav { margin-left: auto; display: flex; gap: 16px; font-size: .95rem; }
 .top nav a { color: var(--muted); text-decoration: none; }
 .top nav a:hover { color: var(--accent); }
