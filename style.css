@@ -1,77 +1,170 @@
+/* Q Digital. Tema i Pantone 341 (#007A53). */
 :root {
-  --bg: #ffffff; --surface: #f4f8f6; --text: #13221c; --muted: #4f5f58;
-  --accent: #007a53; --accent-text: #ffffff; --border: #dde7e2;
+  --p341: #007a53; --p341-dark: #005c3e; --p341-deep: #00402b; --mint: #8fdcbc;
+  --bg: #ffffff; --surface: #ffffff; --tint: #eef6f2; --text: #13221c; --muted: #4f5f58;
+  --accent: #007a53; --border: #d9e8e0; --shadow: 0 1px 2px rgba(0,64,43,.06), 0 8px 24px rgba(0,64,43,.08);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e1714; --surface: #15221d; --text: #e8efec; --muted: #a3b3ac;
-    --accent: #2fb684; --accent-text: #0e1714; --border: #24362f;
+    --bg: #0a1712; --surface: #10241c; --tint: #0e1f18; --text: #e6f0eb; --muted: #9fb4aa;
+    --accent: #3fc28f; --border: #1f3a2f; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0e1714; --surface: #15221d; --text: #e8efec; --muted: #a3b3ac;
-  --accent: #2fb684; --accent-text: #0e1714; --border: #24362f;
+  --bg: #0a1712; --surface: #10241c; --tint: #0e1f18; --text: #e6f0eb; --muted: #9fb4aa;
+  --accent: #3fc28f; --border: #1f3a2f; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
   font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 a { color: var(--accent); }
-main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+.icon { width: 24px; height: 24px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
 
-.top {
-  max-width: 760px; margin: 0 auto; padding: 20px 16px 0;
-  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+/* Grøn top med logo, navigation og intro */
+.hero {
+  position: relative; overflow: hidden; color: #fff;
+  background: radial-gradient(120% 90% at 85% 0%, #00a06c 0%, var(--p341) 45%, var(--p341-dark) 100%);
 }
-.brand {
-  font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em;
-  color: var(--text); text-decoration: none;
+.hero::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 90%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 90%);
 }
-.brand span { color: var(--accent); font-weight: 800; }
-/* Logo 1: Q popper frem, og resten glider ind. Kun ved første visning. */
+.hero-art { position: absolute; right: -120px; top: -60px; width: 520px; height: 520px; opacity: .14; pointer-events: none; }
+.hero-art .ring { transform-origin: 260px 260px; animation: spin 60s linear infinite; }
+.hero-art .tail { animation: tail 4s ease-in-out infinite; transform-origin: 360px 360px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes tail { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+
+.top { position: relative; z-index: 2; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 20px; }
+.brand { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; color: #fff; text-decoration: none; }
+.brand span { color: var(--mint); font-weight: 800; }
+/* Logo 1: Q popper frem, og resten glider ind. */
 .brand span { display: inline-block; animation: q-pop .6s ease-out both; }
 .brand b { display: inline-block; font-weight: inherit; animation: q-slide .6s ease-out .45s both; }
 @keyframes q-pop { 0% { transform: scale(0); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
 @keyframes q-slide { from { opacity: 0; transform: translateX(-14px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .brand span, .brand b { animation: none; } }
-.top nav { margin-left: auto; display: flex; gap: 16px; font-size: .95rem; }
-.top nav a { color: var(--muted); text-decoration: none; }
-.top nav a:hover { color: var(--accent); }
-.top nav a.lang {
-  color: var(--accent); border: 1px solid var(--accent);
-  border-radius: 8px; padding: 0 8px;
+.top nav { margin-left: auto; display: flex; gap: 18px; font-size: .95rem; align-items: center; }
+.top nav a { color: rgba(255,255,255,.85); text-decoration: none; }
+.top nav a:hover { color: #fff; }
+.top nav a.lang { color: #fff; border: 1px solid rgba(255,255,255,.6); border-radius: 8px; padding: 0 8px; }
+
+.intro { position: relative; z-index: 2; padding: 56px 0 96px; max-width: 680px; }
+.intro h1 { font-size: 2.6rem; line-height: 1.12; letter-spacing: -.025em; margin: 0 0 16px; }
+.intro p { font-size: 1.15rem; margin: 0; color: rgba(255,255,255,.88); }
+.pills { display: flex; flex-wrap: wrap; gap: 10px; margin: 28px 0 0; padding: 0; list-style: none; }
+.pills li {
+  display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); font-size: .95rem;
+  backdrop-filter: blur(4px);
+}
+.pills .icon { width: 18px; height: 18px; color: var(--mint); }
+.cta {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 32px; padding: 12px 20px;
+  border-radius: 12px; background: #fff; color: var(--p341-deep); font-weight: 700; text-decoration: none;
+  box-shadow: 0 6px 20px rgba(0,40,25,.25); transition: transform .2s, box-shadow .2s;
+}
+.cta:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,40,25,.3); }
+.cta .icon { width: 18px; height: 18px; transition: transform .2s; }
+.cta:hover .icon { transform: translateX(3px); }
+.wave { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 48px; z-index: 1; color: var(--bg); }
+
+/* Indlæsning: elementer glider op en ad gangen */
+.rise { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.d1 { animation-delay: .1s; } .d2 { animation-delay: .25s; } .d3 { animation-delay: .4s; } .d4 { animation-delay: .55s; }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+/* Afsnit */
+main.wrap { padding-top: 8px; padding-bottom: 72px; }
+.section-head { display: flex; align-items: center; gap: 12px; margin: 48px 0 20px; }
+.section-head .badge { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--tint); color: var(--accent); }
+.section-head h2 { font-size: 1.5rem; margin: 0; letter-spacing: -.01em; }
+
+/* Produkter */
+.projects { display: grid; gap: 18px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .projects { grid-template-columns: 1fr 1fr; } }
+.product {
+  position: relative; display: flex; flex-direction: column; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 22px;
+  box-shadow: var(--shadow); transition: transform .25s, border-color .25s, box-shadow .25s; overflow: hidden;
+}
+.product::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px;
+  background: linear-gradient(90deg, var(--p341), var(--mint)); transform: scaleX(0); transform-origin: left; transition: transform .35s;
+}
+.product:hover { transform: translateY(-4px); border-color: var(--accent); }
+.product:hover::before { transform: scaleX(1); }
+.product .head { display: flex; align-items: center; gap: 14px; }
+.product .logo {
+  width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; flex: none;
+  background: linear-gradient(135deg, var(--p341), var(--p341-dark)); color: #fff;
+  box-shadow: 0 6px 16px rgba(0,122,83,.3); transition: transform .3s;
+}
+.product .logo .icon { width: 26px; height: 26px; }
+.product:hover .logo { transform: rotate(-6deg) scale(1.06); }
+.product h3 { margin: 0; font-size: 1.15rem; }
+.product h3 a { color: var(--text); text-decoration: none; }
+.product h3 a::after { content: ""; position: absolute; inset: 0; } /* hele kortet er klikbart */
+.tag { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--accent); }
+.product p { margin: 0; color: var(--muted); }
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 6px; }
+.links a {
+  position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 6px;
+  font-size: .9rem; font-weight: 600; text-decoration: none; padding: 6px 12px; border-radius: 999px;
+  background: var(--tint); color: var(--accent); transition: background .2s, color .2s;
+}
+.links a:hover { background: var(--accent); color: #fff; }
+.links .icon { width: 16px; height: 16px; }
+
+/* Om */
+.about {
+  display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start;
+  background: var(--tint); border-radius: 18px; padding: 24px; border: 1px solid var(--border);
+}
+.about .mark { width: 64px; height: 64px; }
+.about p { margin: 0; }
+
+/* Kontakt */
+.facts { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); margin: 0; padding: 0; list-style: none; }
+.facts li { display: flex; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
+.facts .icon { color: var(--accent); }
+.facts small { display: block; color: var(--muted); font-size: .8rem; }
+.facts strong { font-weight: 600; overflow-wrap: anywhere; }
+
+/* Bund */
+.foot { background: var(--p341-deep); color: rgba(255,255,255,.8); font-size: .9rem; }
+.foot .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding-top: 28px; padding-bottom: 28px; }
+.foot a { color: #fff; }
+
+/* Kort der glider ind, når man scroller */
+.js .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1); }
+.js .reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 520px) {
+  .intro { padding: 40px 0 80px; }
+  .intro h1 { font-size: 2rem; }
+  .top nav { gap: 14px; }
+  .about { grid-template-columns: 1fr; }
+  .section-head h2 { font-size: 1.3rem; }
+  .facts li { padding: 12px 14px; }
+  .hero-art { width: 360px; height: 360px; right: -140px; top: -40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .js .reveal { opacity: 1; transform: none; }
 }
 
-h1 { font-size: 2.3rem; line-height: 1.15; letter-spacing: -.02em; margin: 40px 0 12px; }
-h2 { font-size: 1.35rem; margin: 56px 0 16px; }
-p.lead { font-size: 1.15rem; color: var(--muted); margin: 0; }
-
-.projects { display: grid; gap: 16px; }
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 16px; padding: 20px;
-}
-.card h3 { margin: 0 0 6px; font-size: 1.15rem; }
-.card h3 a { color: var(--text); text-decoration: none; }
-.card h3 a:hover { color: var(--accent); }
+/* Enkle undersider som Crowns bruger stadig de gamle klasser */
+body > main:not(.wrap) { max-width: 760px; margin: 0 auto; padding: 48px 16px 64px; }
+body > main:not(.wrap) h1 { color: var(--accent); }
+.lead { font-size: 1.15rem; color: var(--muted); margin: 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
 .card p { margin: 0; color: var(--muted); }
-.tag {
-  display: inline-block; font-size: .75rem; font-weight: 600; padding: 2px 8px;
-  border-radius: 999px; background: var(--border); color: var(--muted);
-  margin-left: 6px; vertical-align: middle;
-}
-.links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; font-size: .95rem; }
-.links a { font-weight: 600; }
-
-.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; margin: 0; }
-.facts dt { color: var(--muted); }
-.facts dd { margin: 0; }
-
-footer { margin-top: 56px; color: var(--muted); font-size: .9rem; }
-@media (max-width: 480px) {
-  h1 { font-size: 1.9rem; }
-  .facts { grid-template-columns: 1fr; gap: 0; }
-  .facts dd { margin-bottom: 10px; }
-}
+body > main:not(.wrap) footer { margin-top: 56px; color: var(--muted); font-size: .9rem; }
