@@ -2,7 +2,7 @@
 
 Firmaets hjemmeside på https://qdigital.dk/ med engelsk version på /en/.
 
-Siden er ren HTML og CSS uden byggetrin. Den udgives også med GitHub Pages på https://qvisty.github.io/qdigital/
+Siden er ren HTML og CSS uden byggetrin. Den udgives kun til Simply. GitHub Pages er slået fra.
 
 ## Udgivelse til Simply
 
