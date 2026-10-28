@@ -22,6 +22,22 @@ jobs:
         if: env.HAS_FTP == 'true'
         uses: actions/checkout@v4
 
+      - name: Skriv konfiguration til feedback
+        if: env.HAS_FTP == 'true'
+        env:
+          FEEDBACK_SMTP_PASSWORD: ${{ secrets.FEEDBACK_SMTP_PASSWORD }}
+        run: |
+          # api/feedback.php sender mails via Simplys SMTP som noreply@qdigital.dk.
+          # Uden hemmeligheden svarer scriptet blot "Not configured".
+          if [ -n "$FEEDBACK_SMTP_PASSWORD" ]; then
+            php -r 'file_put_contents("api/config.php", "<?php return " . var_export([
+              "smtp_host" => "websmtp.simply.com",
+              "smtp_user" => "noreply@qdigital.dk",
+              "smtp_pass" => getenv("FEEDBACK_SMTP_PASSWORD"),
+              "to" => "apps@qdigital.dk",
+            ], true) . ";\n");'
+          fi
+
       - name: Upload til Simply
         if: env.HAS_FTP == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
