@@ -10,7 +10,11 @@
 //
 // The app key is not a secret (it ships inside the apps). It only keeps random
 // bots out, together with the rate limit below.
-const APP_KEYS = ['crowns' => 'a3bcd6e0a1bc73b6ac39ba58ed9d0dcc'];
+const APP_KEYS = [
+    'crowns' => 'a3bcd6e0a1bc73b6ac39ba58ed9d0dcc',
+    'pocketssh' => 'bedc9e702d1f2666a2929fc3ee1e24b1',
+];
+const APP_NAMES = ['crowns' => 'Crowns', 'pocketssh' => 'Pocket SSH'];
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -55,7 +59,7 @@ $android = $clean($input['android'] ?? '', 10);
 if (mb_strlen($message) < 3) reply(400, ['ok' => false, 'error' => 'Message is empty']);
 if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) reply(400, ['ok' => false, 'error' => 'Invalid email']);
 
-$subject = '[' . ucfirst($app) . '] ' . $type . ($email !== '' ? '' : ' (no reply address)');
+$subject = '[' . (APP_NAMES[$app] ?? $app) . '] ' . $type . ($email !== '' ? '' : ' (no reply address)');
 $body = $message . "\n\n---\n"
     . 'App: ' . $app . ' ' . $version . "\n"
     . 'Android: ' . $android . "\n"
