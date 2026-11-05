@@ -55,6 +55,34 @@ jobs:
             README.md
             .nojekyll
 
+      - name: Skriv konfiguration til Truckspotting forslag
+        if: env.HAS_FTP == 'true'
+        env:
+          FEEDBACK_SMTP_PASSWORD: ${{ secrets.FEEDBACK_SMTP_PASSWORD }}
+        run: |
+          # truckspotting/forslag/index.php læser config.php fra truckspotting-data ved siden af public_html.
+          # Den bruger samme postkasse som feedback. Filen skrives uden for repoet og kommer aldrig i public_html.
+          mkdir -p "$RUNNER_TEMP/truckspotting-data"
+          if [ -n "$FEEDBACK_SMTP_PASSWORD" ]; then
+            php -r 'file_put_contents(getenv("RUNNER_TEMP") . "/truckspotting-data/config.php", "<?php return " . var_export([
+              "host" => "websmtp.simply.com",
+              "user" => "noreply@qdigital.dk",
+              "pass" => getenv("FEEDBACK_SMTP_PASSWORD"),
+              "to" => "kontakt@qdigital.dk",
+            ], true) . ";\n");'
+          fi
+
+      - name: Upload konfiguration til Truckspotting forslag
+        if: env.HAS_FTP == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ${{ runner.temp }}/truckspotting-data/
+          server-dir: truckspotting-data/
+
       - name: Ingen FTP oplysninger endnu
         if: env.HAS_FTP != 'true'
         run: echo "FTP hemmelighederne mangler, så der er ikke udgivet noget."

@@ -32,3 +32,10 @@ Logofilerne er tegnet som stier med skriften Inter, så de ser ens ud overalt ud
 ## Regler for indhold
 
 Læg aldrig CPR, fuld adresse, telefonnummer, kontonumre, kortnumre eller adgangskoder på siden eller i repoet.
+
+## Truckspotting forslag
+
+`truckspotting/forslag/index.php` tager imod forslag til Truckspottings katalog fra appen. Den er kopieret uændret fra repoet qvisty/Truckspotting, mappen `server/`.
+
+1. Forslagene gemmes i `truckspotting-data/forslag.csv` ved siden af `public_html`, så de ikke kan ses fra nettet.
+2. Udgivelsen skriver `truckspotting-data/config.php` med postkassen noreply@qdigital.dk og hemmeligheden `FEEDBACK_SMTP_PASSWORD`. Så sendes hvert forslag som mail til kontakt@qdigital.dk.
