@@ -133,7 +133,7 @@ $cfg = is_file($cfgFile) ? require $cfgFile : [];
 if (is_array($cfg) && isset($cfg['user'], $cfg['pass'], $cfg['to'])) {
     $body = "Nyt forslag til kataloget\n\n"
         . "Mærke: $brand\nSerie: $model\nLand: $country\nVersion: $version\nSprog: $lang\nTid (UTC): $when\n\n"
-        . "Alle forslag ligger også i truckspotting-data/forslag.csv på webhotellet.\n";
+        . "Behandl forslaget her: https://qdigital.dk/truckspotting/forslag/behandl/\n";
     smtp_send($cfg, "Truckspotting forslag: $brand $model", $body);
 }
 reply(200, 'ok');
