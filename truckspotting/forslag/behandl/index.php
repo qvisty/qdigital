@@ -84,6 +84,49 @@ function move_line(string $from, string $to, string $id, callable $transform): b
     return $ok;
 }
 
+/** Samme regel som appens normalizedName: små bogstaver, kun bogstaver og tal. */
+function norm(string $s): string {
+    return preg_replace('/[^\p{L}\p{N}]+/u', '', mb_strtolower($s)) ?? '';
+}
+
+/** Appens katalog. Kopien katalog.json skal være den samme som i appen, det tjekker en test i repoet. */
+function catalog(): array {
+    static $brands = null;
+    if ($brands !== null) return $brands;
+    $json = @file_get_contents(__DIR__ . '/katalog.json');
+    $data = $json === false ? null : json_decode($json, true);
+    $brands = is_array($data['brands'] ?? null) ? $data['brands'] : [];
+    return $brands;
+}
+
+const RARITY = ['COMMON' => 'almindelig', 'RARE' => 'sjælden', 'EPIC' => 'episk', 'LEGENDARY' => 'legendarisk'];
+
+/**
+ * Slår et forslag op i kataloget. Giver [klasse, tekst]: findes allerede, ligner en model, kun mærket
+ * findes, eller helt nyt. "Ligner" er, når det ene navn indeholder det andet, fx "R" og "R serie".
+ */
+function lookup(string $brand, string $model): array {
+    $b = norm($brand);
+    $m = norm($model);
+    $found = null;
+    foreach (catalog() as $cb) {
+        $n = norm((string) ($cb['name'] ?? ''));
+        if ($n !== '' && $b !== '' && ($n === $b || str_contains($n, $b) || str_contains($b, $n))) { $found = $cb; break; }
+    }
+    if ($found === null) return ['new', 'Nyt mærke. Findes ikke i appen.'];
+    $similar = [];
+    foreach ($found['models'] ?? [] as $cm) {
+        $names = array_filter([norm((string) ($cm['name'] ?? '')), norm((string) ($cm['nameEn'] ?? ''))]);
+        $label = $found['name'] . ' ' . ($cm['name'] ?? '') . ' (' . (RARITY[$cm['rarity'] ?? ''] ?? '') . ')';
+        if ($m !== '' && in_array($m, $names, true)) return ['have', 'Findes allerede i appen: ' . $label];
+        foreach ($names as $n) {
+            if ($m !== '' && (str_contains($n, $m) || str_contains($m, $n))) { $similar[] = $label; break; }
+        }
+    }
+    if ($similar) return ['like', 'Ligner: ' . implode(', ', $similar)];
+    return ['brand', $found['name'] . ' findes i appen, men ikke denne model.'];
+}
+
 /** Et behandlet forslag er: status, tidspunkt og derefter den oprindelige linje uændret. */
 function handled_line(string $status, string $line): string {
     return $status . ',' . gmdate('Y-m-d H:i:s') . ',' . $line;
@@ -196,6 +239,9 @@ unset($_SESSION['flash']);
   .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
   button { font: inherit; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--fg); padding: 10px 14px; cursor: pointer; }
   .ok { border-color: var(--ok); color: var(--ok); font-weight: 600; } .no { border-color: var(--no); color: var(--no); font-weight: 600; }
+  .tag { display: inline-block; font-size: .8rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); margin-right: 6px; }
+  .google { color: #b26a00; border-color: #b26a00; }
+  .look { margin-top: 6px; font-size: .95rem; } .look-have { color: var(--ok); } .look-like { color: #b26a00; } .look-new, .look-brand { color: var(--fg); font-weight: 600; }
   .status-tilføjet { color: var(--ok); font-weight: 600; } .status-afvist { color: var(--no); font-weight: 600; }
   input[type=password], input[type=text] { font: inherit; padding: 10px; border-radius: 10px; border: 1px solid var(--line); width: 100%; box-sizing: border-box; background: var(--card); color: var(--fg); }
   code { overflow-wrap: anywhere; } header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
@@ -233,10 +279,12 @@ unset($_SESSION['flash']);
   <?php if ($flash !== ''): ?><div class="flash"><?= h($flash) ?></div><?php endif; ?>
 
   <?php if (!$open): ?><p class="muted">Ingen forslag venter.</p><?php endif; ?>
-  <?php foreach ($open as $line): $f = str_getcsv($line, ',', '"', ''); ?>
+  <?php foreach ($open as $line): $f = str_getcsv($line, ',', '"', ''); [$lk, $lt] = lookup($f[1] ?? '', $f[2] ?? ''); ?>
     <div class="card">
+      <?php if (($f[6] ?? '') === 'google'): ?><span class="tag google">Google test</span><?php endif; ?>
       <div class="name"><?= h(trim(($f[1] ?? '') . ' ' . ($f[2] ?? ''))) ?: '(tomt)' ?></div>
       <div class="muted"><?= h(implode(' · ', array_filter([$f[0] ?? '', $f[3] ?? '', isset($f[4]) && $f[4] !== '' ? 'v' . $f[4] : '', $f[5] ?? ''], fn($v) => $v !== ''))) ?></div>
+      <div class="look look-<?= h($lk) ?>"><?= h($lt) ?></div>
       <form method="post" class="row">
         <input type="hidden" name="csrf" value="<?= $csrf ?>"><input type="hidden" name="id" value="<?= h(id_of($line)) ?>">
         <button class="ok" name="action" value="added">Tilføjet</button>

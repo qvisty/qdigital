@@ -1,0 +1,633 @@
+{
+  "version": 1,
+  "brands": [
+    {
+      "id": "scania",
+      "name": "Scania",
+      "models": [
+        {
+          "id": "scania-r-serie",
+          "name": "R serie",
+          "nameEn": "R series",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "scania-s-serie",
+          "name": "S serie",
+          "nameEn": "S series",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "scania-s-770-v8",
+          "name": "S 770 V8",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "scania-g-serie",
+          "name": "G serie",
+          "nameEn": "G series",
+          "rarity": "RARE"
+        },
+        {
+          "id": "scania-p-serie",
+          "name": "P serie",
+          "nameEn": "P series",
+          "rarity": "RARE"
+        },
+        {
+          "id": "scania-next-gen-r",
+          "name": "Next Gen R",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "scania-l-serie",
+          "name": "L serie",
+          "rarity": "RARE",
+          "nameEn": "L series"
+        },
+        {
+          "id": "scania-t-cab",
+          "name": "T Cab",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "scania-143m",
+          "name": "143M",
+          "rarity": "LEGENDARY"
+        }
+      ]
+    },
+    {
+      "id": "volvo",
+      "name": "Volvo",
+      "models": [
+        {
+          "id": "volvo-fh",
+          "name": "FH",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "volvo-fh16",
+          "name": "FH16",
+          "rarity": "RARE"
+        },
+        {
+          "id": "volvo-fh-aero",
+          "name": "FH Aero",
+          "rarity": "RARE"
+        },
+        {
+          "id": "volvo-fm",
+          "name": "FM",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "volvo-fl",
+          "name": "FL",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "volvo-fmx",
+          "name": "FMX",
+          "rarity": "RARE"
+        },
+        {
+          "id": "volvo-fe",
+          "name": "FE",
+          "rarity": "RARE"
+        },
+        {
+          "id": "volvo-fh-electric",
+          "name": "FH Electric",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "volvo-f12",
+          "name": "F12",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "volvo-n10",
+          "name": "N10",
+          "rarity": "LEGENDARY"
+        }
+      ]
+    },
+    {
+      "id": "daf",
+      "name": "DAF",
+      "models": [
+        {
+          "id": "daf-xf",
+          "name": "XF",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "daf-xg",
+          "name": "XG",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "daf-xgplus",
+          "name": "XG+",
+          "rarity": "RARE"
+        },
+        {
+          "id": "daf-cf",
+          "name": "CF",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "daf-lf",
+          "name": "LF",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "daf-xd",
+          "name": "XD",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "daf-95-ati",
+          "name": "95 ATi",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "daf-xf-space-cab",
+          "name": "XF Space Cab",
+          "rarity": "RARE"
+        },
+        {
+          "id": "daf-xb",
+          "name": "XB",
+          "rarity": "RARE"
+        },
+        {
+          "id": "daf-3300",
+          "name": "3300",
+          "rarity": "LEGENDARY"
+        }
+      ]
+    },
+    {
+      "id": "mercedes-benz",
+      "name": "Mercedes-Benz",
+      "models": [
+        {
+          "id": "mercedes-benz-actros",
+          "name": "Actros",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "mercedes-benz-actros-l",
+          "name": "Actros L",
+          "rarity": "RARE"
+        },
+        {
+          "id": "mercedes-benz-arocs",
+          "name": "Arocs",
+          "rarity": "RARE"
+        },
+        {
+          "id": "mercedes-benz-eactros",
+          "name": "eActros",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "mercedes-benz-atego",
+          "name": "Atego",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "mercedes-benz-sk",
+          "name": "SK",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "mercedes-benz-ng",
+          "name": "NG",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "mercedes-benz-axor",
+          "name": "Axor",
+          "rarity": "RARE"
+        },
+        {
+          "id": "mercedes-benz-econic",
+          "name": "Econic",
+          "rarity": "RARE"
+        }
+      ]
+    },
+    {
+      "id": "man",
+      "name": "MAN",
+      "models": [
+        {
+          "id": "man-tgx",
+          "name": "TGX",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "man-tgs",
+          "name": "TGS",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "man-tgx-18640",
+          "name": "TGX 18.640",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "man-tgl",
+          "name": "TGL",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "man-tgm",
+          "name": "TGM",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "man-f2000",
+          "name": "F2000",
+          "rarity": "RARE"
+        },
+        {
+          "id": "man-f90",
+          "name": "F90",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "man-19414",
+          "name": "19.414",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "man-etgx",
+          "name": "eTGX",
+          "rarity": "EPIC"
+        }
+      ]
+    },
+    {
+      "id": "iveco",
+      "name": "Iveco",
+      "models": [
+        {
+          "id": "iveco-s-way",
+          "name": "S-Way",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "iveco-stralis",
+          "name": "Stralis",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "iveco-x-way",
+          "name": "X-Way",
+          "rarity": "RARE"
+        },
+        {
+          "id": "iveco-hi-way",
+          "name": "Hi-Way",
+          "rarity": "RARE"
+        },
+        {
+          "id": "iveco-turbostar",
+          "name": "Turbostar",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "iveco-eurostar",
+          "name": "Eurostar",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "iveco-t-way",
+          "name": "T-Way",
+          "rarity": "RARE"
+        },
+        {
+          "id": "iveco-daily",
+          "name": "Daily",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "iveco-eurocargo",
+          "name": "Eurocargo",
+          "rarity": "COMMON"
+        }
+      ]
+    },
+    {
+      "id": "renault-trucks",
+      "name": "Renault Trucks",
+      "models": [
+        {
+          "id": "renault-trucks-t",
+          "name": "T",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "renault-trucks-c",
+          "name": "C",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "renault-trucks-d",
+          "name": "D",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "renault-trucks-t-high",
+          "name": "T High",
+          "rarity": "RARE"
+        },
+        {
+          "id": "renault-trucks-k",
+          "name": "K",
+          "rarity": "RARE"
+        },
+        {
+          "id": "renault-trucks-e-tech-t",
+          "name": "E-Tech T",
+          "rarity": "RARE"
+        },
+        {
+          "id": "renault-trucks-premium",
+          "name": "Premium",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "renault-trucks-magnum",
+          "name": "Magnum",
+          "rarity": "LEGENDARY"
+        }
+      ]
+    },
+    {
+      "id": "kenworth",
+      "name": "Kenworth",
+      "models": [
+        {
+          "id": "kenworth-t680",
+          "name": "T680",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "kenworth-t880",
+          "name": "T880",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "kenworth-w990",
+          "name": "W990",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "kenworth-t610",
+          "name": "T610",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "kenworth-k200",
+          "name": "K200",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "kenworth-c509",
+          "name": "C509",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "kenworth-w900",
+          "name": "W900",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "kenworth-t909",
+          "name": "T909",
+          "rarity": "LEGENDARY"
+        }
+      ]
+    },
+    {
+      "id": "ford-trucks",
+      "name": "Ford Trucks",
+      "models": [
+        {
+          "id": "ford-trucks-f-max",
+          "name": "F-MAX",
+          "rarity": "RARE"
+        },
+        {
+          "id": "ford-trucks-f-max-l",
+          "name": "F-MAX L",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "ford-trucks-f-line",
+          "name": "F-LINE",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "ford-trucks-cargo",
+          "name": "Cargo",
+          "rarity": "EPIC"
+        }
+      ]
+    },
+    {
+      "id": "peterbilt",
+      "name": "Peterbilt",
+      "models": [
+        {
+          "id": "peterbilt-579",
+          "name": "579",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "peterbilt-567",
+          "name": "567",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "peterbilt-389",
+          "name": "389",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "peterbilt-589",
+          "name": "589",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "peterbilt-379",
+          "name": "379",
+          "rarity": "LEGENDARY"
+        }
+      ]
+    },
+    {
+      "id": "freightliner",
+      "name": "Freightliner",
+      "models": [
+        {
+          "id": "freightliner-cascadia",
+          "name": "Cascadia",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "freightliner-m2-106",
+          "name": "M2 106",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "freightliner-coronado",
+          "name": "Coronado",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "freightliner-122sd",
+          "name": "122SD",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "freightliner-fld",
+          "name": "FLD",
+          "rarity": "LEGENDARY"
+        }
+      ]
+    },
+    {
+      "id": "mack",
+      "name": "Mack",
+      "models": [
+        {
+          "id": "mack-anthem",
+          "name": "Anthem",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "mack-pinnacle",
+          "name": "Pinnacle",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "mack-granite",
+          "name": "Granite",
+          "rarity": "EPIC"
+        },
+        {
+          "id": "mack-super-liner",
+          "name": "Super-Liner",
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "mack-r-model",
+          "name": "R model",
+          "rarity": "LEGENDARY"
+        }
+      ]
+    },
+    {
+      "id": "fuso",
+      "name": "Fuso",
+      "models": [
+        {
+          "id": "fuso-canter",
+          "name": "Canter",
+          "rarity": "COMMON"
+        },
+        {
+          "id": "fuso-ecanter",
+          "name": "eCanter",
+          "rarity": "RARE"
+        }
+      ]
+    },
+    {
+      "id": "isuzu",
+      "name": "Isuzu",
+      "models": [
+        {
+          "id": "isuzu-n-serie",
+          "name": "N-serie",
+          "rarity": "COMMON",
+          "nameEn": "N-series"
+        },
+        {
+          "id": "isuzu-f-serie",
+          "name": "F-serie",
+          "rarity": "RARE",
+          "nameEn": "F-series"
+        }
+      ]
+    }
+  ],
+  "countries": [
+    {
+      "code": "DK",
+      "nameDa": "Danmark",
+      "nameEn": "Denmark"
+    },
+    {
+      "code": "D",
+      "nameDa": "Tyskland",
+      "nameEn": "Germany"
+    },
+    {
+      "code": "S",
+      "nameDa": "Sverige",
+      "nameEn": "Sweden"
+    },
+    {
+      "code": "N",
+      "nameDa": "Norge",
+      "nameEn": "Norway"
+    },
+    {
+      "code": "NL",
+      "nameDa": "Holland",
+      "nameEn": "Netherlands"
+    },
+    {
+      "code": "PL",
+      "nameDa": "Polen",
+      "nameEn": "Poland"
+    },
+    {
+      "code": "LT",
+      "nameDa": "Litauen",
+      "nameEn": "Lithuania"
+    },
+    {
+      "code": "F",
+      "nameDa": "Frankrig",
+      "nameEn": "France"
+    },
+    {
+      "code": "I",
+      "nameDa": "Italien",
+      "nameEn": "Italy"
+    },
+    {
+      "code": "E",
+      "nameDa": "Spanien",
+      "nameEn": "Spain"
+    },
+    {
+      "code": "CZ",
+      "nameDa": "Tjekkiet",
+      "nameEn": "Czechia"
+    },
+    {
+      "code": "RO",
+      "nameDa": "Rumænien",
+      "nameEn": "Romania"
+    }
+  ]
+}
