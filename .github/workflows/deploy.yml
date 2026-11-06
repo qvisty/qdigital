@@ -59,18 +59,22 @@ jobs:
         if: env.HAS_FTP == 'true'
         env:
           FEEDBACK_SMTP_PASSWORD: ${{ secrets.FEEDBACK_SMTP_PASSWORD }}
+          TRUCKSPOTTING_ADMIN_HASH: ${{ secrets.TRUCKSPOTTING_ADMIN_HASH }}
         run: |
-          # truckspotting/forslag/index.php læser config.php fra truckspotting-data ved siden af public_html.
-          # Den bruger samme postkasse som feedback. Filen skrives uden for repoet og kommer aldrig i public_html.
+          # truckspotting/forslag/index.php og behandl/index.php læser config.php fra truckspotting-data ved siden af public_html.
+          # Mailen bruger samme postkasse som feedback. admin_hash er adgangskoden til siden behandl, gemt som hash.
+          # Filen skrives uden for repoet og kommer aldrig i public_html.
           mkdir -p "$RUNNER_TEMP/truckspotting-data"
-          if [ -n "$FEEDBACK_SMTP_PASSWORD" ]; then
-            php -r 'file_put_contents(getenv("RUNNER_TEMP") . "/truckspotting-data/config.php", "<?php return " . var_export([
-              "host" => "websmtp.simply.com",
-              "user" => "noreply@qdigital.dk",
-              "pass" => getenv("FEEDBACK_SMTP_PASSWORD"),
-              "to" => "kontakt@qdigital.dk",
-            ], true) . ";\n");'
-          fi
+          php -r '
+            $cfg = [];
+            if ((string) getenv("FEEDBACK_SMTP_PASSWORD") !== "") {
+              $cfg += ["host" => "websmtp.simply.com", "user" => "noreply@qdigital.dk",
+                       "pass" => getenv("FEEDBACK_SMTP_PASSWORD"), "to" => "kontakt@qdigital.dk"];
+            }
+            $hash = trim((string) getenv("TRUCKSPOTTING_ADMIN_HASH"));
+            if ($hash !== "") $cfg["admin_hash"] = $hash;
+            if ($cfg) file_put_contents(getenv("RUNNER_TEMP") . "/truckspotting-data/config.php", "<?php return " . var_export($cfg, true) . ";\n");
+          '
 
       - name: Upload konfiguration til Truckspotting forslag
         if: env.HAS_FTP == 'true'

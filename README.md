@@ -39,3 +39,4 @@ Læg aldrig CPR, fuld adresse, telefonnummer, kontonumre, kortnumre eller adgang
 
 1. Forslagene gemmes i `truckspotting-data/forslag.csv` ved siden af `public_html`, så de ikke kan ses fra nettet.
 2. Udgivelsen skriver `truckspotting-data/config.php` med postkassen noreply@qdigital.dk og hemmeligheden `FEEDBACK_SMTP_PASSWORD`. Så sendes hvert forslag som mail til kontakt@qdigital.dk.
+3. `truckspotting/forslag/behandl/` er siden, hvor forslag markeres som tilføjet eller afvist. Adgangskoden ligger som hash i hemmeligheden `TRUCKSPOTTING_ADMIN_HASH`, og udgivelsen skriver den i `config.php` som `admin_hash`. Siden viser selv hashen første gang, før hemmeligheden findes. Ret ikke `config.php` på webhotellet i hånden, for udgivelsen kan skrive den igen.
