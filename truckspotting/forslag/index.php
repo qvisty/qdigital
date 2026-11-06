@@ -113,6 +113,11 @@ if (!preg_match('/^[a-z]{2}$/', $lang)) $lang = '';
 $dir = data_dir();
 if (rate_limited($dir)) reply(429, 'later');
 
+// Googles automatiske test i Play Console kører appen på emulatorer, som også sender forslag.
+// De gemmes stadig, for forslaget kan være godt, men de markeres, så ejeren kan se det.
+$ua = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
+$source = preg_match('/sdk_gphone|google_sdk|\bEmulator\b|Android SDK built for/i', $ua) ? 'google' : '';
+
 $when = gmdate('Y-m-d H:i:s');
 $fp = fopen($dir . '/forslag.csv', 'a+');
 if ($fp === false) reply(500, 'store');
@@ -123,7 +128,7 @@ $last = ftell($fp) >= 0 ? fread($fp, 1) : '';
 if ($last !== '' && $last !== false && $last !== "\n" && $last !== "\r") fwrite($fp, "\n");
 // En apostrof foran = + - @ forhindrer, at feltet bliver en formel, når filen åbnes i et regneark
 $safe = fn(string $v): string => preg_match('/^[=+\-@]/', $v) ? "'" . $v : $v;
-fputcsv($fp, array_map($safe, [$when, $brand, $model, $country, $version, $lang]), ',', '"', '');
+fputcsv($fp, array_map($safe, [$when, $brand, $model, $country, $version, $lang, $source]), ',', '"', '');
 flock($fp, LOCK_UN);
 fclose($fp);
 
@@ -132,8 +137,9 @@ $cfg = is_file($cfgFile) ? require $cfgFile : [];
 // config.php kan også kun have adgangskoden til siden behandl. Så sendes ingen mail
 if (is_array($cfg) && isset($cfg['user'], $cfg['pass'], $cfg['to'])) {
     $body = "Nyt forslag til kataloget\n\n"
+        . ($source === 'google' ? "Fra Googles testrobot (emulator). Forslaget kan stadig være godt.\n\n" : '')
         . "Mærke: $brand\nSerie: $model\nLand: $country\nVersion: $version\nSprog: $lang\nTid (UTC): $when\n\n"
         . "Behandl forslaget her: https://qdigital.dk/truckspotting/forslag/behandl/\n";
-    smtp_send($cfg, "Truckspotting forslag: $brand $model", $body);
+    smtp_send($cfg, ($source === 'google' ? '[Google test] ' : '') . "Truckspotting forslag: $brand $model", $body);
 }
 reply(200, 'ok');
