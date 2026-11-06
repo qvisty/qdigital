@@ -1,0 +1,265 @@
+<?php
+// Side til at behandle forslag til kataloget.
+// Ligger på https://qdigital.dk/truckspotting/forslag/behandl/ (public_html/truckspotting/forslag/behandl/index.php).
+// Et forslag slettes aldrig. Det flyttes fra forslag.csv til behandlet.csv med status, og det kan fortrydes.
+// Adgangskoden ligger kun som hash i truckspotting-data/config.php under 'admin_hash'. Se server/README.md.
+
+declare(strict_types=1);
+
+const MAX_LOGIN_FAILS = 5;
+const SHOWN_HANDLED = 30;
+const COLUMNS = ['Tid (UTC)', 'Mærke', 'Serie', 'Land', 'Version', 'Sprog'];
+
+function data_dir(): string {
+    $dir = getenv('TRUCKSPOTTING_DATA') ?: __DIR__ . '/../../../../truckspotting-data';
+    if (!is_dir($dir)) mkdir($dir, 0700, true);
+    return $dir;
+}
+
+function h(string $s): string {
+    return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function config(): array {
+    $file = data_dir() . '/config.php';
+    if (!is_file($file)) return [];
+    $cfg = require $file;
+    return is_array($cfg) ? $cfg : [];
+}
+
+/** Læser alle ikke tomme linjer. Linjerne bevares præcis, som de står, så intet ændres ved en fejl. */
+function lines_of(string $file): array {
+    if (!is_file($file)) return [];
+    $raw = file_get_contents($file);
+    if ($raw === false || $raw === '') return [];
+    $raw = preg_replace('/^\xEF\xBB\xBF/', '', $raw) ?? $raw;
+    return array_values(array_filter(preg_split('/\r\n|\n|\r/', $raw) ?: [], fn($l) => trim($l) !== ''));
+}
+
+function id_of(string $line): string {
+    return substr(hash('sha256', $line), 0, 20);
+}
+
+/**
+ * Flytter den første linje med [$id] fra [$from] til [$to] under lås. [$transform] laver linjen om på vejen.
+ * Begge filer låses i samme rækkefølge hver gang, og modtageren låser forslag.csv, når den skriver.
+ */
+function move_line(string $from, string $to, string $id, callable $transform): bool {
+    $dir = data_dir();
+    $lock = fopen($dir . '/behandl.lock', 'c');
+    if ($lock === false) return false;
+    flock($lock, LOCK_EX);
+    $fp = fopen($dir . '/' . $from, 'c+');
+    if ($fp === false) { fclose($lock); return false; }
+    flock($fp, LOCK_EX);
+    $raw = stream_get_contents($fp) ?: '';
+    $raw = preg_replace('/^\xEF\xBB\xBF/', '', $raw) ?? $raw;
+    $lines = array_values(array_filter(preg_split('/\r\n|\n|\r/', $raw) ?: [], fn($l) => trim($l) !== ''));
+    $found = null;
+    foreach ($lines as $i => $l) {
+        if (id_of($l) === $id) { $found = $i; break; }
+    }
+    $ok = false;
+    if ($found !== null) {
+        $line = $lines[$found];
+        $out = fopen($dir . '/' . $to, 'a');
+        if ($out !== false) {
+            flock($out, LOCK_EX);
+            $ok = fwrite($out, $transform($line) . "\n") !== false;
+            flock($out, LOCK_UN);
+            fclose($out);
+        }
+        if ($ok) {
+            array_splice($lines, $found, 1);
+            ftruncate($fp, 0);
+            rewind($fp);
+            fwrite($fp, $lines ? implode("\n", $lines) . "\n" : '');
+            fflush($fp);
+        }
+    }
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    flock($lock, LOCK_UN);
+    fclose($lock);
+    return $ok;
+}
+
+/** Et behandlet forslag er: status, tidspunkt og derefter den oprindelige linje uændret. */
+function handled_line(string $status, string $line): string {
+    return $status . ',' . gmdate('Y-m-d H:i:s') . ',' . $line;
+}
+
+function original_of(string $handled): string {
+    $parts = explode(',', $handled, 3);
+    return $parts[2] ?? $handled;
+}
+
+/** Spærrer login i en time efter MAX_LOGIN_FAILS forkerte forsøg fra samme afsender. */
+function login_blocked(bool $failed): bool {
+    $key = substr(hash('sha256', 'behandl' . ($_SERVER['REMOTE_ADDR'] ?? '')), 0, 16);
+    $file = data_dir() . '/login.json';
+    $hour = (int) floor(time() / 3600);
+    $fp = fopen($file, 'c+');
+    if ($fp === false) return true;
+    flock($fp, LOCK_EX);
+    $data = json_decode(stream_get_contents($fp) ?: '{}', true) ?: [];
+    if (($data['hour'] ?? 0) !== $hour) $data = ['hour' => $hour, 'fails' => []];
+    if ($failed) $data['fails'][$key] = ($data['fails'][$key] ?? 0) + 1;
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode($data));
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    return ($data['fails'][$key] ?? 0) >= MAX_LOGIN_FAILS;
+}
+
+header('X-Robots-Tag: noindex, nofollow');
+header('Cache-Control: no-store');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: no-referrer');
+header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'");
+
+$https = ($_SERVER['HTTPS'] ?? '') !== '' && ($_SERVER['HTTPS'] ?? '') !== 'off';
+session_name('tsbehandl');
+session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => $https, 'httponly' => true, 'samesite' => 'Strict']);
+session_start();
+
+$cfg = config();
+$hash = is_string($cfg['admin_hash'] ?? null) ? $cfg['admin_hash'] : '';
+$post = ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST';
+$action = $post ? (string) ($_POST['action'] ?? '') : '';
+$message = '';
+
+if ($post && $action !== 'login' && $action !== 'makehash'
+    && !hash_equals((string) ($_SESSION['csrf'] ?? ''), (string) ($_POST['csrf'] ?? ''))) {
+    http_response_code(400);
+    exit('Siden var for gammel. Gå tilbage og prøv igen.');
+}
+
+if ($action === 'logout') {
+    $_SESSION = [];
+    session_destroy();
+    header('Location: ./', true, 303);
+    exit;
+}
+
+if ($action === 'login' && $hash !== '') {
+    if (login_blocked(false)) {
+        $message = 'For mange forkerte forsøg. Prøv igen om en time.';
+    } elseif (password_verify((string) ($_POST['password'] ?? ''), $hash)) {
+        session_regenerate_id(true);
+        $_SESSION['ok'] = true;
+        $_SESSION['csrf'] = bin2hex(random_bytes(16));
+        header('Location: ./', true, 303);
+        exit;
+    } else {
+        login_blocked(true);
+        $message = 'Forkert adgangskode.';
+    }
+}
+
+$logged_in = ($_SESSION['ok'] ?? false) === true && $hash !== '';
+
+if ($logged_in && $post) {
+    $id = (string) ($_POST['id'] ?? '');
+    if ($action === 'added' || $action === 'rejected') {
+        $status = $action === 'added' ? 'tilføjet' : 'afvist';
+        $ok = move_line('forslag.csv', 'behandlet.csv', $id, fn($l) => handled_line($status, $l));
+        $_SESSION['flash'] = $ok ? "Markeret som $status." : 'Forslaget findes ikke længere. Intet er ændret.';
+    } elseif ($action === 'undo') {
+        $ok = move_line('behandlet.csv', 'forslag.csv', $id, fn($l) => original_of($l));
+        $_SESSION['flash'] = $ok ? 'Fortrudt. Forslaget er tilbage på listen.' : 'Kunne ikke finde det. Intet er ændret.';
+    }
+    header('Location: ./', true, 303);
+    exit;
+}
+
+$flash = (string) ($_SESSION['flash'] ?? '');
+unset($_SESSION['flash']);
+?>
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Truckspotting forslag</title>
+<style>
+  :root { --bg: #f6f6f8; --card: #fff; --fg: #1b1b1f; --muted: #5b5b66; --line: #dcdce3; --ok: #1f7a3a; --no: #a32b2b; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #111116; --card: #1b1b22; --fg: #ececf1; --muted: #a4a4b0; --line: #33333d; --ok: #5fd07f; --no: #ff8a8a; } }
+  body { background: var(--bg); color: var(--fg); font: 16px/1.45 system-ui, sans-serif; margin: 0 auto; max-width: 46rem; padding: 16px; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; } h2 { font-size: 1.1rem; margin-top: 28px; }
+  .muted { color: var(--muted); } .flash { background: var(--card); border-left: 4px solid var(--ok); padding: 10px 12px; margin: 12px 0; }
+  .err { border-left-color: var(--no); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 10px 0; }
+  .name { font-weight: 700; font-size: 1.05rem; overflow-wrap: anywhere; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  button { font: inherit; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--fg); padding: 10px 14px; cursor: pointer; }
+  .ok { border-color: var(--ok); color: var(--ok); font-weight: 600; } .no { border-color: var(--no); color: var(--no); font-weight: 600; }
+  .status-tilføjet { color: var(--ok); font-weight: 600; } .status-afvist { color: var(--no); font-weight: 600; }
+  input[type=password], input[type=text] { font: inherit; padding: 10px; border-radius: 10px; border: 1px solid var(--line); width: 100%; box-sizing: border-box; background: var(--card); color: var(--fg); }
+  code { overflow-wrap: anywhere; } header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+</style>
+</head>
+<body>
+<?php if ($hash === ''): ?>
+  <h1>Opsætning</h1>
+  <p>Siden har endnu ingen adgangskode. Skriv den adgangskode, du vil bruge. Siden gemmer den ikke, men viser en linje, som du selv sætter ind i <code>truckspotting-data/config.php</code> før <code>];</code>.</p>
+  <?php if ($action === 'makehash' && strlen((string) ($_POST['password'] ?? '')) >= 10): ?>
+    <div class="card"><code>'admin_hash' =&gt; '<?= h(password_hash((string) $_POST['password'], PASSWORD_DEFAULT)) ?>',</code></div>
+  <?php elseif ($action === 'makehash'): ?>
+    <div class="flash err">Brug mindst 10 tegn.</div>
+  <?php endif; ?>
+  <form method="post"><input type="hidden" name="action" value="makehash">
+    <input type="password" name="password" autocomplete="new-password" placeholder="Ny adgangskode, mindst 10 tegn" required minlength="10">
+    <div class="row"><button class="ok">Lav linjen</button></div>
+  </form>
+<?php elseif (!$logged_in): ?>
+  <h1>Truckspotting forslag</h1>
+  <?php if ($message !== ''): ?><div class="flash err"><?= h($message) ?></div><?php endif; ?>
+  <form method="post"><input type="hidden" name="action" value="login">
+    <input type="password" name="password" autocomplete="current-password" placeholder="Adgangskode" required autofocus>
+    <div class="row"><button class="ok">Log ind</button></div>
+  </form>
+<?php else:
+    $csrf = h((string) $_SESSION['csrf']);
+    $open = lines_of(data_dir() . '/forslag.csv');
+    $handled = array_reverse(lines_of(data_dir() . '/behandlet.csv'));
+?>
+  <header>
+    <div><h1>Forslag til kataloget</h1><div class="muted"><?= count($open) ?> venter, <?= count($handled) ?> behandlet</div></div>
+    <form method="post"><input type="hidden" name="csrf" value="<?= $csrf ?>"><button name="action" value="logout">Log ud</button></form>
+  </header>
+  <?php if ($flash !== ''): ?><div class="flash"><?= h($flash) ?></div><?php endif; ?>
+
+  <?php if (!$open): ?><p class="muted">Ingen forslag venter.</p><?php endif; ?>
+  <?php foreach ($open as $line): $f = str_getcsv($line, ',', '"', ''); ?>
+    <div class="card">
+      <div class="name"><?= h(trim(($f[1] ?? '') . ' ' . ($f[2] ?? ''))) ?: '(tomt)' ?></div>
+      <div class="muted"><?= h(implode(' · ', array_filter([$f[0] ?? '', $f[3] ?? '', isset($f[4]) && $f[4] !== '' ? 'v' . $f[4] : '', $f[5] ?? ''], fn($v) => $v !== ''))) ?></div>
+      <form method="post" class="row">
+        <input type="hidden" name="csrf" value="<?= $csrf ?>"><input type="hidden" name="id" value="<?= h(id_of($line)) ?>">
+        <button class="ok" name="action" value="added">Tilføjet</button>
+        <button class="no" name="action" value="rejected">Afvist</button>
+      </form>
+    </div>
+  <?php endforeach; ?>
+
+  <?php if ($handled): ?>
+    <h2>Behandlet</h2>
+    <p class="muted">Intet slettes. Fortryd lægger forslaget tilbage på listen. Viser de seneste <?= SHOWN_HANDLED ?>.</p>
+    <?php foreach (array_slice($handled, 0, SHOWN_HANDLED) as $line):
+        $f = str_getcsv($line, ',', '"', ''); $status = $f[0] ?? ''; ?>
+      <div class="card">
+        <div><span class="status-<?= h($status) ?>"><?= h(ucfirst($status)) ?></span> <span class="muted"><?= h($f[1] ?? '') ?></span></div>
+        <div class="name"><?= h(trim(($f[3] ?? '') . ' ' . ($f[4] ?? ''))) ?></div>
+        <form method="post" class="row">
+          <input type="hidden" name="csrf" value="<?= $csrf ?>"><input type="hidden" name="id" value="<?= h(id_of($line)) ?>">
+          <button name="action" value="undo">Fortryd</button>
+        </form>
+      </div>
+    <?php endforeach; ?>
+  <?php endif; ?>
+<?php endif; ?>
+</body>
+</html>

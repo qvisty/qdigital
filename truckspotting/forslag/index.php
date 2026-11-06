@@ -114,9 +114,13 @@ $dir = data_dir();
 if (rate_limited($dir)) reply(429, 'later');
 
 $when = gmdate('Y-m-d H:i:s');
-$fp = fopen($dir . '/forslag.csv', 'a');
+$fp = fopen($dir . '/forslag.csv', 'a+');
 if ($fp === false) reply(500, 'store');
 flock($fp, LOCK_EX);
+// Er filen rettet i hånden og gemt uden linjeskift til sidst, kommer det nye forslag ellers på samme linje
+fseek($fp, -1, SEEK_END);
+$last = ftell($fp) >= 0 ? fread($fp, 1) : '';
+if ($last !== '' && $last !== false && $last !== "\n" && $last !== "\r") fwrite($fp, "\n");
 // En apostrof foran = + - @ forhindrer, at feltet bliver en formel, når filen åbnes i et regneark
 $safe = fn(string $v): string => preg_match('/^[=+\-@]/', $v) ? "'" . $v : $v;
 fputcsv($fp, array_map($safe, [$when, $brand, $model, $country, $version, $lang]), ',', '"', '');
@@ -124,8 +128,9 @@ flock($fp, LOCK_UN);
 fclose($fp);
 
 $cfgFile = $dir . '/config.php';
-if (is_file($cfgFile)) {
-    $cfg = require $cfgFile;
+$cfg = is_file($cfgFile) ? require $cfgFile : [];
+// config.php kan også kun have adgangskoden til siden behandl. Så sendes ingen mail
+if (is_array($cfg) && isset($cfg['user'], $cfg['pass'], $cfg['to'])) {
     $body = "Nyt forslag til kataloget\n\n"
         . "Mærke: $brand\nSerie: $model\nLand: $country\nVersion: $version\nSprog: $lang\nTid (UTC): $when\n\n"
         . "Alle forslag ligger også i truckspotting-data/forslag.csv på webhotellet.\n";
