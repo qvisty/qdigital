@@ -60,9 +60,11 @@ jobs:
         env:
           FEEDBACK_SMTP_PASSWORD: ${{ secrets.FEEDBACK_SMTP_PASSWORD }}
           TRUCKSPOTTING_ADMIN_HASH: ${{ secrets.TRUCKSPOTTING_ADMIN_HASH }}
+          TRUCKSPOTTING_API_HASH: ${{ secrets.TRUCKSPOTTING_API_HASH }}
         run: |
           # truckspotting/forslag/index.php og behandl/index.php læser config.php fra truckspotting-data ved siden af public_html.
           # Mailen bruger samme postkasse som feedback. admin_hash er adgangskoden til siden behandl, gemt som hash.
+          # api_hash er hashen af nøglen til siden behandls JSON adgang.
           # Filen skrives uden for repoet og kommer aldrig i public_html.
           mkdir -p "$RUNNER_TEMP/truckspotting-data"
           php -r '
@@ -73,6 +75,8 @@ jobs:
             }
             $hash = trim((string) getenv("TRUCKSPOTTING_ADMIN_HASH"));
             if ($hash !== "") $cfg["admin_hash"] = $hash;
+            $api = trim((string) getenv("TRUCKSPOTTING_API_HASH"));
+            if ($api !== "") $cfg["api_hash"] = $api;
             if ($cfg) file_put_contents(getenv("RUNNER_TEMP") . "/truckspotting-data/config.php", "<?php return " . var_export($cfg, true) . ";\n");
           '
 

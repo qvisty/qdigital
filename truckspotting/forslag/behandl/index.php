@@ -173,6 +173,64 @@ $post = ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST';
 $action = $post ? (string) ($_POST['action'] ?? '') : '';
 $message = '';
 
+// Adgang for Claude med en nøgle i headeren X-Api-Key (eller Authorization: Bearer). Kun hashen af nøglen ligger i
+// config.php under 'api_hash'. Svarer med JSON og bruger hverken session eller cookies.
+$apiHash = is_string($cfg['api_hash'] ?? null) ? $cfg['api_hash'] : '';
+$auth = (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
+$apiCall = (string) ($_GET['api'] ?? $_POST['api'] ?? '');
+if ($apiCall !== '') {
+    header('Content-Type: application/json; charset=utf-8');
+    $token = trim((string) ($_SERVER['HTTP_X_API_KEY'] ?? ''));
+    if ($token === '' && preg_match('/^Bearer\s+(\S+)$/', $auth, $m)) $token = $m[1];
+    if ($apiHash === '' || $token === '' || login_blocked(false) || !password_verify($token, $apiHash)) {
+        if ($token !== '') login_blocked(true);
+        http_response_code(401);
+        exit(json_encode(['status' => 'unauthorized']));
+    }
+    $dir = data_dir();
+    $row = function (string $line, bool $handled): array {
+        $f = str_getcsv($line, ',', '"', '');
+        if ($handled) {
+            $status = $f[0] ?? '';
+            $at = $f[1] ?? '';
+            $f = array_slice($f, 2);
+        }
+        $out = ['id' => id_of($line), 'when' => $f[0] ?? '', 'brand' => $f[1] ?? '', 'model' => $f[2] ?? '', 'country' => $f[3] ?? '',
+            'version' => $f[4] ?? '', 'lang' => $f[5] ?? '', 'source' => $f[6] ?? ''];
+        if ($handled) {
+            $out['status'] = $status;
+            $out['handled_at'] = $at;
+        } else {
+            [$kind, $text] = lookup($out['brand'], $out['model']);
+            $out['lookup'] = ['kind' => $kind, 'text' => $text];
+        }
+        return $out;
+    };
+    if ($apiCall === 'list') {
+        exit(json_encode([
+            'open' => array_map(fn($l) => $row($l, false), lines_of($dir . '/forslag.csv')),
+            'handled' => array_map(fn($l) => $row($l, true), array_slice(array_reverse(lines_of($dir . '/behandlet.csv')), 0, 50)),
+        ], JSON_UNESCAPED_UNICODE));
+    }
+    if (!$post) {
+        http_response_code(405);
+        exit(json_encode(['status' => 'method']));
+    }
+    $id = (string) ($_POST['id'] ?? '');
+    $ok = match ($apiCall) {
+        'added' => move_line('forslag.csv', 'behandlet.csv', $id, fn($l) => handled_line('tilføjet', $l)),
+        'rejected' => move_line('forslag.csv', 'behandlet.csv', $id, fn($l) => handled_line('afvist', $l)),
+        'undo' => move_line('behandlet.csv', 'forslag.csv', $id, fn($l) => original_of($l)),
+        default => null,
+    };
+    if ($ok === null) {
+        http_response_code(400);
+        exit(json_encode(['status' => 'unknown']));
+    }
+    http_response_code($ok ? 200 : 404);
+    exit(json_encode(['status' => $ok ? 'ok' : 'missing']));
+}
+
 if ($post && $action !== 'login' && $action !== 'makehash'
     && !hash_equals((string) ($_SESSION['csrf'] ?? ''), (string) ($_POST['csrf'] ?? ''))) {
     http_response_code(400);
@@ -209,6 +267,10 @@ if ($logged_in && $post) {
         $status = $action === 'added' ? 'tilføjet' : 'afvist';
         $ok = move_line('forslag.csv', 'behandlet.csv', $id, fn($l) => handled_line($status, $l));
         $_SESSION['flash'] = $ok ? "Markeret som $status." : 'Forslaget findes ikke længere. Intet er ændret.';
+    } elseif ($action === 'makekey') {
+        // Nøglen vises kun denne ene gang. Siden gemmer den ikke, kun den hash, ejeren selv lægger i GitHub
+        $key = bin2hex(random_bytes(24));
+        $_SESSION['newkey'] = ['key' => $key, 'hash' => password_hash($key, PASSWORD_DEFAULT)];
     } elseif ($action === 'undo') {
         $ok = move_line('behandlet.csv', 'forslag.csv', $id, fn($l) => original_of($l));
         $_SESSION['flash'] = $ok ? 'Fortrudt. Forslaget er tilbage på listen.' : 'Kunne ikke finde det. Intet er ændret.';
@@ -219,6 +281,8 @@ if ($logged_in && $post) {
 
 $flash = (string) ($_SESSION['flash'] ?? '');
 unset($_SESSION['flash']);
+$newKey = $_SESSION['newkey'] ?? null;
+unset($_SESSION['newkey']);
 ?>
 <!doctype html>
 <html lang="da">
@@ -308,6 +372,16 @@ unset($_SESSION['flash']);
       </div>
     <?php endforeach; ?>
   <?php endif; ?>
+
+  <h2>Nøgle til Claude</h2>
+  <p class="muted">Med en nøgle kan Claude selv hente forslag, tjekke dem mod kataloget og markere dem. Nøglen vises kun én gang. Hashen skal i GitHub hemmeligheden <code>TRUCKSPOTTING_API_HASH</code>, og selve nøglen skal i den sikre formular, som Claude viser dig. Skriv aldrig nøglen i chatten.</p>
+  <?php if (is_array($newKey)): ?>
+    <div class="card"><div class="muted">Nøgle</div><code><?= h($newKey['key']) ?></code></div>
+    <div class="card"><div class="muted">Hash til GitHub</div><code><?= h($newKey['hash']) ?></code></div>
+  <?php endif; ?>
+  <form method="post" class="row"><input type="hidden" name="csrf" value="<?= $csrf ?>">
+    <button name="action" value="makekey"><?= $apiHash === '' ? 'Lav nøgle' : 'Lav ny nøgle' ?></button>
+  </form>
 <?php endif; ?>
 </body>
 </html>
