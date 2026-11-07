@@ -102,6 +102,11 @@
           "rarity": "EPIC"
         },
         {
+          "id": "volvo-vnl",
+          "name": "VNL",
+          "rarity": "EPIC"
+        },
+        {
           "id": "volvo-f12",
           "name": "F12",
           "rarity": "LEGENDARY"
