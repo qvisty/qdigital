@@ -94,6 +94,8 @@ main.wrap { padding-top: 8px; padding-bottom: 72px; }
 .section-head h2 { font-size: 1.5rem; margin: 0; letter-spacing: -.01em; }
 
 /* Produkter */
+.group-head { font-size: 1.05rem; font-weight: 700; color: var(--muted); margin: 28px 0 12px; letter-spacing: .01em; }
+.section-head + .group-head { margin-top: 0; }
 .projects { display: grid; gap: 18px; grid-template-columns: 1fr; }
 @media (min-width: 720px) { .projects { grid-template-columns: 1fr 1fr; } }
 .product {
