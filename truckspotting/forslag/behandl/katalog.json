@@ -12,6 +12,11 @@
           "rarity": "COMMON"
         },
         {
+          "id": "scania-r-v8",
+          "name": "R V8",
+          "rarity": "RARE"
+        },
+        {
           "id": "scania-s-serie",
           "name": "S serie",
           "nameEn": "S series",
