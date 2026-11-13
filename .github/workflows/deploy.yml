@@ -67,6 +67,9 @@ jobs:
           # api_hash er hashen af nøglen til siden behandls JSON adgang.
           # Filen skrives uden for repoet og kommer aldrig i public_html.
           mkdir -p "$RUNNER_TEMP/truckspotting-data"
+          # truckspotting/venner/index.php kræver mappen truckspotting-data/venner. Saltet laver scriptet selv første gang.
+          mkdir -p "$RUNNER_TEMP/truckspotting-data/venner"
+          touch "$RUNNER_TEMP/truckspotting-data/venner/.keep"
           php -r '
             $cfg = [];
             if ((string) getenv("FEEDBACK_SMTP_PASSWORD") !== "") {
