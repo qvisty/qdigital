@@ -148,8 +148,9 @@ function valid_profile(mixed $p): ?array {
     $finds = $p['finds'] ?? [];
     if (!is_array($finds) || !array_is_list($finds) || count($finds) > 3) return null;
     $known = catalog_ids();
-    foreach ($finds as $f) if (!is_string($f) || !isset($known[$f])) return null;
-    $out['finds'] = array_values($finds);
+    foreach ($finds as $f) if (!is_string($f) || strlen($f) > 80) return null;
+    // Ukendte fund udelades i stedet for at afvise hele profilen. Appen kan kende nyere modeller end serverens kopi
+    $out['finds'] = array_values(array_filter($finds, fn($f) => isset($known[$f])));
     return $out;
 }
 
@@ -248,6 +249,8 @@ $existing = is_file($file) ? json_decode((string) file_get_contents($file), true
 $hash = hash('sha256', $secret);
 if (is_array($existing) && !hash_equals((string) ($existing['secret'] ?? ''), $hash)) reply(403, ['status' => 'secret']);
 $today = gmdate('Y-m-d');
+// En slettet kode bruges aldrig igen, heller ikke af ejeren. Appen laver så en ny kode
+if ($op === 'put' && is_array($existing) && !empty($existing['deleted'])) reply(403, ['status' => 'deleted']);
 
 if ($op === 'delete') {
     // En kode, der aldrig er registreret, efterlader intet. Ellers kunne sletninger fylde serveren
