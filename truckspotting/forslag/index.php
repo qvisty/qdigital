@@ -1,18 +1,38 @@
 <?php
 // Modtager forslag til Truckspottings katalog fra appen.
 // Ligger på https://qdigital.dk/truckspotting/forslag/ (public_html/truckspotting/forslag/index.php).
-// Gemmer hvert forslag i en CSV fil uden for public_html og sender det som mail til kontakt@qdigital.dk.
+// Gemmer hvert forslag i en CSV fil uden for public_html. Højst én mail om dagen til kontakt@qdigital.dk
+// med de forslag, der er kommet siden sidste mail (ejerens valg 13. november 2026).
 // Adgangen til SMTP ligger i config.php uden for public_html og aldrig i repoet. Se server/README.md.
 
 declare(strict_types=1);
 
 const MAX_FIELD = 40;
 const MAX_PER_HOUR = 20;
+/** Samlet for alle afsendere, så mange adresser på én gang ikke kan fylde filen. Kan sænkes i testen. */
+define('MAX_ALL_HOUR', (int) (getenv('TRUCKSPOTTING_MAX_ALL_HOUR') ?: 200));
+define('MAX_ALL_DAY', (int) (getenv('TRUCKSPOTTING_MAX_ALL_DAY') ?: 1000));
+/** Loft over forslag.csv. Over det tages der ikke imod flere, før der er ryddet op. */
+define('MAX_CSV_BYTES', (int) (getenv('TRUCKSPOTTING_MAX_CSV_BYTES') ?: 1_000_000));
+const MAIL_EVERY_SECONDS = 86400;
 
+/** Mappen uden for public_html. Den oprettes aldrig her, så en forkert sti ikke lægger filerne åbent. */
 function data_dir(): string {
     $dir = getenv('TRUCKSPOTTING_DATA') ?: __DIR__ . '/../../../truckspotting-data';
-    if (!is_dir($dir)) mkdir($dir, 0700, true);
+    if (!is_dir($dir)) reply(500, 'store');
     return $dir;
+}
+
+/** Et hemmeligt salt til hashen af IP adressen. Laves første gang og ligger kun i datamappen. */
+function salt(string $dir): string {
+    $file = $dir . '/salt.txt';
+    $salt = is_file($file) ? trim((string) file_get_contents($file)) : '';
+    if ($salt === '') {
+        $salt = bin2hex(random_bytes(16));
+        file_put_contents($file, $salt, LOCK_EX);
+        @chmod($file, 0600);
+    }
+    return $salt;
 }
 
 function reply(int $code, string $status): never {
@@ -31,25 +51,75 @@ function clean(mixed $value): string {
     return mb_substr($value, 0, MAX_FIELD);
 }
 
-/** Højst MAX_PER_HOUR forslag i timen fra samme afsender. IP adressen gemmes kun som en hash. */
+/**
+ * Højst MAX_PER_HOUR forslag i timen fra samme afsender og højst MAX_ALL_HOUR og MAX_ALL_DAY i alt.
+ * IP adressen gemmes kun som en hash med et hemmeligt salt.
+ */
 function rate_limited(string $dir): bool {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '';
-    $key = substr(hash('sha256', 'truckspotting' . $ip), 0, 16);
+    $key = substr(hash('sha256', salt($dir) . $ip), 0, 16);
     $file = $dir . '/rate.json';
     $hour = (int) floor(time() / 3600);
+    $day = (int) floor(time() / 86400);
     $fp = fopen($file, 'c+');
-    if ($fp === false) return false;
+    if ($fp === false) return true;
     flock($fp, LOCK_EX);
     $data = json_decode(stream_get_contents($fp) ?: '{}', true) ?: [];
-    if (($data['hour'] ?? 0) !== $hour) $data = ['hour' => $hour, 'count' => []];
+    if (($data['hour'] ?? 0) !== $hour) { $data['hour'] = $hour; $data['count'] = []; $data['all_hour'] = 0; }
+    if (($data['day'] ?? 0) !== $day) { $data['day'] = $day; $data['all_day'] = 0; }
     $count = ($data['count'][$key] ?? 0) + 1;
     $data['count'][$key] = $count;
+    $data['all_hour'] = ($data['all_hour'] ?? 0) + 1;
+    $data['all_day'] = ($data['all_day'] ?? 0) + 1;
     ftruncate($fp, 0);
     rewind($fp);
     fwrite($fp, json_encode($data));
     flock($fp, LOCK_UN);
     fclose($fp);
-    return $count > MAX_PER_HOUR;
+    return $count > MAX_PER_HOUR || $data['all_hour'] > MAX_ALL_HOUR || $data['all_day'] > MAX_ALL_DAY;
+}
+
+/**
+ * Sender højst én mail pr. MAIL_EVERY_SECONDS med alle forslag siden sidste mail. Det første forslag efter et
+ * stille døgn sendes derfor med det samme. Kommer der flere, venter de til næste døgn.
+ */
+function maybe_send_digest(string $dir, array $cfg): void {
+    $stateFile = $dir . '/mail.json';
+    $fp = fopen($stateFile, 'c+');
+    if ($fp === false) return;
+    flock($fp, LOCK_EX);
+    $state = json_decode(stream_get_contents($fp) ?: '{}', true) ?: [];
+    $last = (int) ($state['sent_at'] ?? 0);
+    $since = (string) ($state['since'] ?? '');
+    if (time() - $last >= MAIL_EVERY_SECONDS) {
+        $rows = [];
+        $csv = @fopen($dir . '/forslag.csv', 'r');
+        if ($csv !== false) {
+            while (($f = fgetcsv($csv, 0, ',', '"', '')) !== false) {
+                if (($f[0] ?? '') > $since) $rows[] = $f;
+            }
+            fclose($csv);
+        }
+        if ($rows) {
+            $google = count(array_filter($rows, fn($f) => ($f[6] ?? '') === 'google'));
+            $body = count($rows) . " nye forslag til kataloget siden sidste mail\n"
+                . ($google ? "$google af dem er fra Googles testrobot (emulator). De kan stadig være gode.\n" : '')
+                . "\n";
+            foreach ($rows as $f) {
+                $body .= ($f[0] ?? '') . '  ' . ($f[1] ?? '') . ' ' . ($f[2] ?? '') . '  ' . ($f[3] ?? '')
+                    . '  ' . ($f[4] ?? '') . ' ' . ($f[5] ?? '') . (($f[6] ?? '') === 'google' ? '  [Google test]' : '') . "\n";
+            }
+            $body .= "\nBehandl forslagene her: https://qdigital.dk/truckspotting/forslag/behandl/\n";
+            if (smtp_send($cfg, 'Truckspotting: ' . count($rows) . ' nye forslag', $body)) {
+                $state = ['sent_at' => time(), 'since' => (string) end($rows)[0]];
+                ftruncate($fp, 0);
+                rewind($fp);
+                fwrite($fp, json_encode($state));
+            }
+        }
+    }
+    flock($fp, LOCK_UN);
+    fclose($fp);
 }
 
 /** Sender en mail gennem websmtp.simply.com på port 587 med STARTTLS. */
@@ -94,6 +164,8 @@ function smtp_send(array $cfg, string $subject, string $body): bool {
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') reply(405, 'method');
+// Appen sender altid JSON. Alt andet er ikke fra appen
+if (!str_starts_with(strtolower((string) ($_SERVER['CONTENT_TYPE'] ?? '')), 'application/json')) reply(415, 'type');
 $raw = file_get_contents('php://input', false, null, 0, 4096) ?: '';
 $in = json_decode($raw, true);
 if (!is_array($in)) reply(400, 'json');
@@ -118,8 +190,16 @@ if (rate_limited($dir)) reply(429, 'later');
 $ua = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
 $source = preg_match('/sdk_gphone|google_sdk|\bEmulator\b|Android SDK built for/i', $ua) ? 'google' : '';
 
+$csvFile = $dir . '/forslag.csv';
+clearstatcache(true, $csvFile);
+if (is_file($csvFile) && filesize($csvFile) > MAX_CSV_BYTES) reply(503, 'full');
+
 $when = gmdate('Y-m-d H:i:s');
-$fp = fopen($dir . '/forslag.csv', 'a+');
+// Samme lås som siden behandl, som skriver filen om via en midlertidig fil
+$lock = fopen($dir . '/behandl.lock', 'c');
+if ($lock === false) reply(500, 'store');
+flock($lock, LOCK_EX);
+$fp = fopen($csvFile, 'a+');
 if ($fp === false) reply(500, 'store');
 flock($fp, LOCK_EX);
 // Er filen rettet i hånden og gemt uden linjeskift til sidst, kommer det nye forslag ellers på samme linje
@@ -131,15 +211,11 @@ $safe = fn(string $v): string => preg_match('/^[=+\-@]/', $v) ? "'" . $v : $v;
 fputcsv($fp, array_map($safe, [$when, $brand, $model, $country, $version, $lang, $source]), ',', '"', '');
 flock($fp, LOCK_UN);
 fclose($fp);
+flock($lock, LOCK_UN);
+fclose($lock);
 
 $cfgFile = $dir . '/config.php';
 $cfg = is_file($cfgFile) ? require $cfgFile : [];
 // config.php kan også kun have adgangskoden til siden behandl. Så sendes ingen mail
-if (is_array($cfg) && isset($cfg['user'], $cfg['pass'], $cfg['to'])) {
-    $body = "Nyt forslag til kataloget\n\n"
-        . ($source === 'google' ? "Fra Googles testrobot (emulator). Forslaget kan stadig være godt.\n\n" : '')
-        . "Mærke: $brand\nSerie: $model\nLand: $country\nVersion: $version\nSprog: $lang\nTid (UTC): $when\n\n"
-        . "Behandl forslaget her: https://qdigital.dk/truckspotting/forslag/behandl/\n";
-    smtp_send($cfg, ($source === 'google' ? '[Google test] ' : '') . "Truckspotting forslag: $brand $model", $body);
-}
+if (is_array($cfg) && isset($cfg['user'], $cfg['pass'], $cfg['to'])) maybe_send_digest($dir, $cfg);
 reply(200, 'ok');
