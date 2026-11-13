@@ -1,7 +1,8 @@
 <?php
 // Side til at behandle forslag til kataloget.
 // Ligger på https://qdigital.dk/truckspotting/forslag/behandl/ (public_html/truckspotting/forslag/behandl/index.php).
-// Et forslag slettes aldrig. Det flyttes fra forslag.csv til behandlet.csv med status, og det kan fortrydes.
+// Et behandlet forslag flyttes fra forslag.csv til behandlet.csv med status, og det kan fortrydes. Kun en
+// anmodning om sletning (api=delete) fjerner et forslag helt, som privatlivspolitikken lover.
 // Adgangskoden ligger kun som hash i truckspotting-data/config.php under 'admin_hash'. Se server/README.md.
 
 declare(strict_types=1);
@@ -10,10 +11,21 @@ const MAX_LOGIN_FAILS = 5;
 const SHOWN_HANDLED = 30;
 const COLUMNS = ['Tid (UTC)', 'Mærke', 'Serie', 'Land', 'Version', 'Sprog'];
 
+/** Mappen uden for public_html. Den oprettes aldrig her, så en forkert sti ikke lægger filerne åbent. */
 function data_dir(): string {
     $dir = getenv('TRUCKSPOTTING_DATA') ?: __DIR__ . '/../../../../truckspotting-data';
-    if (!is_dir($dir)) mkdir($dir, 0700, true);
+    if (!is_dir($dir)) {
+        http_response_code(500);
+        exit('Datamappen findes ikke. Se server/README.md.');
+    }
     return $dir;
+}
+
+/** Skriver filen helt om via en midlertidig fil og rename, så den aldrig står halvt skrevet. */
+function write_lines(string $file, array $lines): bool {
+    $tmp = $file . '.tmp';
+    if (file_put_contents($tmp, $lines ? implode("\n", $lines) . "\n" : '') === false) return false;
+    return rename($tmp, $file);
 }
 
 function h(string $s): string {
@@ -42,19 +54,14 @@ function id_of(string $line): string {
 
 /**
  * Flytter den første linje med [$id] fra [$from] til [$to] under lås. [$transform] laver linjen om på vejen.
- * Begge filer låses i samme rækkefølge hver gang, og modtageren låser forslag.csv, når den skriver.
+ * Med [$to] null slettes linjen. Alt sker under behandl.lock, som modtageren også tager, når den skriver.
  */
-function move_line(string $from, string $to, string $id, callable $transform): bool {
+function move_line(string $from, ?string $to, string $id, callable $transform): bool {
     $dir = data_dir();
     $lock = fopen($dir . '/behandl.lock', 'c');
     if ($lock === false) return false;
     flock($lock, LOCK_EX);
-    $fp = fopen($dir . '/' . $from, 'c+');
-    if ($fp === false) { fclose($lock); return false; }
-    flock($fp, LOCK_EX);
-    $raw = stream_get_contents($fp) ?: '';
-    $raw = preg_replace('/^\xEF\xBB\xBF/', '', $raw) ?? $raw;
-    $lines = array_values(array_filter(preg_split('/\r\n|\n|\r/', $raw) ?: [], fn($l) => trim($l) !== ''));
+    $lines = lines_of($dir . '/' . $from);
     $found = null;
     foreach ($lines as $i => $l) {
         if (id_of($l) === $id) { $found = $i; break; }
@@ -62,23 +69,12 @@ function move_line(string $from, string $to, string $id, callable $transform): b
     $ok = false;
     if ($found !== null) {
         $line = $lines[$found];
-        $out = fopen($dir . '/' . $to, 'a');
-        if ($out !== false) {
-            flock($out, LOCK_EX);
-            $ok = fwrite($out, $transform($line) . "\n") !== false;
-            flock($out, LOCK_UN);
-            fclose($out);
-        }
+        $ok = $to === null || file_put_contents($dir . '/' . $to, $transform($line) . "\n", FILE_APPEND | LOCK_EX) !== false;
         if ($ok) {
             array_splice($lines, $found, 1);
-            ftruncate($fp, 0);
-            rewind($fp);
-            fwrite($fp, $lines ? implode("\n", $lines) . "\n" : '');
-            fflush($fp);
+            $ok = write_lines($dir . '/' . $from, $lines);
         }
     }
-    flock($fp, LOCK_UN);
-    fclose($fp);
     flock($lock, LOCK_UN);
     fclose($lock);
     return $ok;
@@ -137,23 +133,30 @@ function original_of(string $handled): string {
     return $parts[2] ?? $handled;
 }
 
-/** Spærrer login i en time efter MAX_LOGIN_FAILS forkerte forsøg fra samme afsender. */
-function login_blocked(bool $failed): bool {
-    $key = substr(hash('sha256', 'behandl' . ($_SERVER['REMOTE_ADDR'] ?? '')), 0, 16);
+/**
+ * Spærrer efter MAX_LOGIN_FAILS forkerte forsøg fra samme afsender den seneste time. Vinduet ruller, så en spærring
+ * ikke nulstilles ved et timeskift. Login på siden ([$kind] "admin") og nøglen ("api") tælles hver for sig.
+ */
+function login_blocked(string $kind, bool $failed): bool {
+    $key = $kind . ':' . substr(hash('sha256', 'behandl' . ($_SERVER['REMOTE_ADDR'] ?? '')), 0, 16);
     $file = data_dir() . '/login.json';
-    $hour = (int) floor(time() / 3600);
+    $now = time();
     $fp = fopen($file, 'c+');
     if ($fp === false) return true;
     flock($fp, LOCK_EX);
     $data = json_decode(stream_get_contents($fp) ?: '{}', true) ?: [];
-    if (($data['hour'] ?? 0) !== $hour) $data = ['hour' => $hour, 'fails' => []];
-    if ($failed) $data['fails'][$key] = ($data['fails'][$key] ?? 0) + 1;
+    $fails = is_array($data['fails'] ?? null) ? $data['fails'] : [];
+    foreach ($fails as $k => $times) {
+        $fails[$k] = array_values(array_filter(is_array($times) ? $times : [], fn($t) => is_int($t) && $t > $now - 3600));
+        if (!$fails[$k]) unset($fails[$k]);
+    }
+    if ($failed) $fails[$key][] = $now;
     ftruncate($fp, 0);
     rewind($fp);
-    fwrite($fp, json_encode($data));
+    fwrite($fp, json_encode(['fails' => $fails]));
     flock($fp, LOCK_UN);
     fclose($fp);
-    return ($data['fails'][$key] ?? 0) >= MAX_LOGIN_FAILS;
+    return count($fails[$key] ?? []) >= MAX_LOGIN_FAILS;
 }
 
 header('X-Robots-Tag: noindex, nofollow');
@@ -161,11 +164,6 @@ header('Cache-Control: no-store');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: no-referrer');
 header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'");
-
-$https = ($_SERVER['HTTPS'] ?? '') !== '' && ($_SERVER['HTTPS'] ?? '') !== 'off';
-session_name('tsbehandl');
-session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => $https, 'httponly' => true, 'samesite' => 'Strict']);
-session_start();
 
 $cfg = config();
 $hash = is_string($cfg['admin_hash'] ?? null) ? $cfg['admin_hash'] : '';
@@ -182,8 +180,8 @@ if ($apiCall !== '') {
     header('Content-Type: application/json; charset=utf-8');
     $token = trim((string) ($_SERVER['HTTP_X_API_KEY'] ?? ''));
     if ($token === '' && preg_match('/^Bearer\s+(\S+)$/', $auth, $m)) $token = $m[1];
-    if ($apiHash === '' || $token === '' || login_blocked(false) || !password_verify($token, $apiHash)) {
-        if ($token !== '') login_blocked(true);
+    if ($apiHash === '' || $token === '' || login_blocked('api', false) || !password_verify($token, $apiHash)) {
+        if ($token !== '') login_blocked('api', true);
         http_response_code(401);
         exit(json_encode(['status' => 'unauthorized']));
     }
@@ -221,6 +219,8 @@ if ($apiCall !== '') {
         'added' => move_line('forslag.csv', 'behandlet.csv', $id, fn($l) => handled_line('tilføjet', $l)),
         'rejected' => move_line('forslag.csv', 'behandlet.csv', $id, fn($l) => handled_line('afvist', $l)),
         'undo' => move_line('behandlet.csv', 'forslag.csv', $id, fn($l) => original_of($l)),
+        // Anmodning om sletning: forslaget fjernes helt, uanset om det er behandlet
+        'delete' => move_line('forslag.csv', null, $id, fn($l) => $l) || move_line('behandlet.csv', null, $id, fn($l) => $l),
         default => null,
     };
     if ($ok === null) {
@@ -230,6 +230,13 @@ if ($apiCall !== '') {
     http_response_code($ok ? 200 : 404);
     exit(json_encode(['status' => $ok ? 'ok' : 'missing']));
 }
+
+// Session og cookie kun for siden, ikke for nøglen. Cookien gælder kun denne mappe
+$https = ($_SERVER['HTTPS'] ?? '') !== '' && ($_SERVER['HTTPS'] ?? '') !== 'off';
+$cookiePath = rtrim(dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/index.php')), '/') . '/';
+session_name('tsbehandl');
+session_set_cookie_params(['lifetime' => 0, 'path' => $cookiePath, 'secure' => $https, 'httponly' => true, 'samesite' => 'Strict']);
+session_start();
 
 if ($post && $action !== 'login' && $action !== 'makehash'
     && !hash_equals((string) ($_SESSION['csrf'] ?? ''), (string) ($_POST['csrf'] ?? ''))) {
@@ -245,7 +252,7 @@ if ($action === 'logout') {
 }
 
 if ($action === 'login' && $hash !== '') {
-    if (login_blocked(false)) {
+    if (login_blocked('admin', false)) {
         $message = 'For mange forkerte forsøg. Prøv igen om en time.';
     } elseif (password_verify((string) ($_POST['password'] ?? ''), $hash)) {
         session_regenerate_id(true);
@@ -254,7 +261,7 @@ if ($action === 'login' && $hash !== '') {
         header('Location: ./', true, 303);
         exit;
     } else {
-        login_blocked(true);
+        login_blocked('admin', true);
         $message = 'Forkert adgangskode.';
     }
 }
