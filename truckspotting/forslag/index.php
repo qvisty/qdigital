@@ -67,57 +67,107 @@ function rate_limited(string $dir): bool {
     $data = json_decode(stream_get_contents($fp) ?: '{}', true) ?: [];
     if (($data['hour'] ?? 0) !== $hour) { $data['hour'] = $hour; $data['count'] = []; $data['all_hour'] = 0; }
     if (($data['day'] ?? 0) !== $day) { $data['day'] = $day; $data['all_day'] = 0; }
+    // Afviste forsøg tæller hverken med i afsenderens eller de samlede tal, så én afsender ikke kan lukke for alle
     $count = ($data['count'][$key] ?? 0) + 1;
-    $data['count'][$key] = $count;
-    $data['all_hour'] = ($data['all_hour'] ?? 0) + 1;
-    $data['all_day'] = ($data['all_day'] ?? 0) + 1;
-    ftruncate($fp, 0);
-    rewind($fp);
-    fwrite($fp, json_encode($data));
+    $limited = $count > MAX_PER_HOUR
+        || ($data['all_hour'] ?? 0) + 1 > MAX_ALL_HOUR
+        || ($data['all_day'] ?? 0) + 1 > MAX_ALL_DAY;
+    if (!$limited) {
+        $data['count'][$key] = $count;
+        $data['all_hour'] = ($data['all_hour'] ?? 0) + 1;
+        $data['all_day'] = ($data['all_day'] ?? 0) + 1;
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, json_encode($data));
+    }
     flock($fp, LOCK_UN);
     fclose($fp);
-    return $count > MAX_PER_HOUR || $data['all_hour'] > MAX_ALL_HOUR || $data['all_day'] > MAX_ALL_DAY;
+    return $limited;
+}
+
+/** En nøgle for et forslag, så forslag fra samme sekund kan skelnes. */
+function row_key(array $f): string {
+    return substr(hash('sha256', json_encode($f)), 0, 16);
+}
+
+/**
+ * Forslag, der ikke har været med i en mail. [since] er tiden for det seneste sendte, og [since_keys] er de sendte
+ * fra netop det sekund, så et forslag fra samme sekund ikke springes over.
+ */
+function unsent_rows(array $rows, array $state): array {
+    $since = (string) ($state['since'] ?? '');
+    $keys = is_array($state['since_keys'] ?? null) ? $state['since_keys'] : [];
+    return array_values(array_filter($rows, function (array $f) use ($since, $keys): bool {
+        $when = (string) ($f[0] ?? '');
+        return $when > $since || ($when === $since && !in_array(row_key($f), $keys, true));
+    }));
+}
+
+/** Tilstanden, efter at [sent] er sendt kl. [now]. */
+function state_after(array $state, array $sent, int $now): array {
+    $since = (string) ($state['since'] ?? '');
+    $keys = is_array($state['since_keys'] ?? null) ? $state['since_keys'] : [];
+    foreach ($sent as $f) {
+        $when = (string) ($f[0] ?? '');
+        if ($when > $since) { $since = $when; $keys = []; }
+        if ($when === $since) $keys[] = row_key($f);
+    }
+    return ['sent_at' => $now, 'since' => $since, 'since_keys' => array_values(array_unique($keys))];
+}
+
+function read_state($fp): array {
+    rewind($fp);
+    return json_decode(stream_get_contents($fp) ?: '{}', true) ?: [];
+}
+
+function write_state($fp, array $state): void {
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode($state));
+    fflush($fp);
 }
 
 /**
  * Sender højst én mail pr. MAIL_EVERY_SECONDS med alle forslag siden sidste mail. Det første forslag efter et
- * stille døgn sendes derfor med det samme. Kommer der flere, venter de til næste døgn.
+ * stille døgn sendes derfor med det samme. Kommer der flere, venter de til næste døgn. Låsen holdes ikke under
+ * SMTP, så en langsom mailserver ikke bremser andre. Tiden reserveres først, så kun én sender.
  */
 function maybe_send_digest(string $dir, array $cfg): void {
-    $stateFile = $dir . '/mail.json';
-    $fp = fopen($stateFile, 'c+');
+    $fp = fopen($dir . '/mail.json', 'c+');
     if ($fp === false) return;
     flock($fp, LOCK_EX);
-    $state = json_decode(stream_get_contents($fp) ?: '{}', true) ?: [];
+    $state = read_state($fp);
     $last = (int) ($state['sent_at'] ?? 0);
-    $since = (string) ($state['since'] ?? '');
-    if (time() - $last >= MAIL_EVERY_SECONDS) {
-        $rows = [];
+    $now = time();
+    $rows = [];
+    if ($now - $last >= MAIL_EVERY_SECONDS) {
+        $all = [];
         $csv = @fopen($dir . '/forslag.csv', 'r');
         if ($csv !== false) {
-            while (($f = fgetcsv($csv, 0, ',', '"', '')) !== false) {
-                if (($f[0] ?? '') > $since) $rows[] = $f;
-            }
+            while (($f = fgetcsv($csv, 0, ',', '"', '')) !== false) $all[] = $f;
             fclose($csv);
         }
-        if ($rows) {
-            $google = count(array_filter($rows, fn($f) => ($f[6] ?? '') === 'google'));
-            $body = count($rows) . " nye forslag til kataloget siden sidste mail\n"
-                . ($google ? "$google af dem er fra Googles testrobot (emulator). De kan stadig være gode.\n" : '')
-                . "\n";
-            foreach ($rows as $f) {
-                $body .= ($f[0] ?? '') . '  ' . ($f[1] ?? '') . ' ' . ($f[2] ?? '') . '  ' . ($f[3] ?? '')
-                    . '  ' . ($f[4] ?? '') . ' ' . ($f[5] ?? '') . (($f[6] ?? '') === 'google' ? '  [Google test]' : '') . "\n";
-            }
-            $body .= "\nBehandl forslagene her: https://qdigital.dk/truckspotting/forslag/behandl/\n";
-            if (smtp_send($cfg, 'Truckspotting: ' . count($rows) . ' nye forslag', $body)) {
-                $state = ['sent_at' => time(), 'since' => (string) end($rows)[0]];
-                ftruncate($fp, 0);
-                rewind($fp);
-                fwrite($fp, json_encode($state));
-            }
-        }
+        $rows = unsent_rows($all, $state);
+        if ($rows) write_state($fp, ['sent_at' => $now] + $state);
     }
+    flock($fp, LOCK_UN);
+    if (!$rows) { fclose($fp); return; }
+
+    $google = count(array_filter($rows, fn($f) => ($f[6] ?? '') === 'google'));
+    $body = count($rows) . " nye forslag til kataloget siden sidste mail\n"
+        . ($google ? "$google af dem er fra Googles testrobot (emulator). De kan stadig være gode.\n" : '')
+        . "\n";
+    foreach ($rows as $f) {
+        $body .= ($f[0] ?? '') . '  ' . ($f[1] ?? '') . ' ' . ($f[2] ?? '') . '  ' . ($f[3] ?? '')
+            . '  ' . ($f[4] ?? '') . ' ' . ($f[5] ?? '') . (($f[6] ?? '') === 'google' ? '  [Google test]' : '') . "\n";
+    }
+    $body .= "\nBehandl forslagene her: https://qdigital.dk/truckspotting/forslag/behandl/\n";
+    $ok = smtp_send($cfg, 'Truckspotting: ' . count($rows) . ' nye forslag', $body);
+
+    flock($fp, LOCK_EX);
+    $current = read_state($fp);
+    // Fejlede mailen, frigives reservationen, så næste forslag prøver igen
+    write_state($fp, $ok ? state_after($current, $rows, $now) : ['sent_at' => $last] + $current);
     flock($fp, LOCK_UN);
     fclose($fp);
 }
@@ -162,6 +212,9 @@ function smtp_send(array $cfg, string $subject, string $body): bool {
     fclose($s);
     return $ok;
 }
+
+// Testen indlæser kun funktionerne
+if (PHP_SAPI === 'cli') return;
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') reply(405, 'method');
 // Appen sender altid JSON. Alt andet er ikke fra appen

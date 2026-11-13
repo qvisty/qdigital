@@ -180,8 +180,10 @@ if ($apiCall !== '') {
     header('Content-Type: application/json; charset=utf-8');
     $token = trim((string) ($_SERVER['HTTP_X_API_KEY'] ?? ''));
     if ($token === '' && preg_match('/^Bearer\s+(\S+)$/', $auth, $m)) $token = $m[1];
-    if ($apiHash === '' || $token === '' || login_blocked('api', false) || !password_verify($token, $apiHash)) {
-        if ($token !== '') login_blocked('api', true);
+    // Under en spærring tælles forsøg ikke, så spærringen ikke forlænges ved hvert forsøg
+    $blocked = $token !== '' && login_blocked('api', false);
+    if ($apiHash === '' || $token === '' || $blocked || !password_verify($token, $apiHash)) {
+        if ($token !== '' && !$blocked) login_blocked('api', true);
         http_response_code(401);
         exit(json_encode(['status' => 'unauthorized']));
     }
