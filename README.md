@@ -42,3 +42,13 @@ Læg aldrig CPR, fuld adresse, telefonnummer, kontonumre, kortnumre eller adgang
 3. `truckspotting/forslag/behandl/` er siden, hvor forslag markeres som tilføjet eller afvist. Adgangskoden ligger som hash i hemmeligheden `TRUCKSPOTTING_ADMIN_HASH`, og udgivelsen skriver den i `config.php` som `admin_hash`. Siden viser selv hashen første gang, før hemmeligheden findes. Ret ikke `config.php` på webhotellet i hånden, for udgivelsen kan skrive den igen.
 4. Siden har også en JSON adgang, som kræver en nøgle i headeren `X-Api-Key`. Kun hashen af nøglen ligger i hemmeligheden `TRUCKSPOTTING_API_HASH`, og udgivelsen skriver den i `config.php` som `api_hash`. Nøglen laves på siden under "Nøgle til Claude".
 5. `truckspotting/venner/index.php` er modtageren til vennekoder i Truckspotting, kopieret uændret fra qvisty/Truckspotting `server/venner/`. Udgivelsen opretter `truckspotting-data/venner/` uden for `public_html`. Scriptet laver selv `salt.txt` dér første gang.
+
+## Ordstriben log
+
+`ordstriben/log/index.php` tager imod en teknisk log fra Ordstribens testversioner, når brugeren selv har slået det til i appen. Loggen har kun pakkenavne og tekniske udfald, aldrig tekst fra felter eller lyd.
+
+1. `POST` med JSON `{"install","version","lines"}` gemmer i `ordstriben-data/log/` uden for `public_html`, én fil pr. install id. Højst 64 KB, 500 linjer og 300 tegn pr. linje. Linjerne skal have formen `ÅÅÅÅ-MM-DD tt:mm:ss|EVENT|...`. Svar 204.
+2. `DELETE ?install=<uuid>` sletter alt for det install id. Svar 204.
+3. `GET ?since=<ISO tid>` kræver headeren `X-Api-Key`. Kun sha256 af nøglen ligger i hemmeligheden `ORDSTRIBEN_LOG_API_HASH`, og udgivelsen skriver den i `ordstriben-data/config.php`.
+4. Data ældre end 30 dage slettes. Grænser pr. afsender tælles med en saltet hash, og IP adresser gemmes aldrig. Findes filen `ordstriben-data/log/lukket`, svarer alle kald 503.
+5. `tests/ordstriben-log.sh` tester det hele lokalt med PHP. Kør den før hver ændring.
