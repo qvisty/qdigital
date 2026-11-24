@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ordstriben, privatlivspolitik</title>
+<style>
+  :root { color-scheme: light dark; --bg:#F7FBFE; --fg:#1E3A5F; --muted:#3F6488; --card:#FFFFFF; --line:#D2E8F9; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#10233A; --fg:#EAF5FD; --muted:#B9DCF5; --card:#16304F; --line:#2A4A70; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:32px 16px 64px; }
+  header { display:flex; align-items:center; gap:14px; margin-bottom:24px; }
+  h1 { font-size:28px; margin:0; } h2 { font-size:20px; margin:32px 0 8px; }
+  p, li { color:var(--fg); } .muted { color:var(--muted); }
+  section { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:4px 20px 12px; margin-top:16px; }
+  a { color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <svg width="56" height="56" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#DCEEFB"/><g fill="none" stroke-linecap="round" stroke-width="40"><path d="M150 214 C179 180 209 180 256 214 S333 248 362 214" stroke="#5FA8E0"/><path d="M150 298 C179 264 209 264 256 298 S333 332 362 298" stroke="#9CCBEF"/></g></svg>
+  <div><h1>Privatlivspolitik for Ordstriben</h1><div class="muted">Gælder fra 24. november 2026, testversion 0.1</div></div>
+</header>
+
+<p>Ordstriben er en dansk dikteringsapp til Android fra Q Digital. Denne testversion viser en knap ved det tekstfelt, du skriver i, og indsætter en fast testtekst ved markøren. Den optager ikke lyd.</p>
+
+<section>
+<h2>Hvad Ordstriben tilgår</h2>
+<p>Ordstriben bruger Androids tilgængelighedstjeneste (AccessibilityService API), når du selv har slået den til og har accepteret forklaringen i appen. Tjenesten læser:</p>
+<ul>
+  <li>hvilket tekstfelt der er aktivt, og hvor det er på skærmen</li>
+  <li>den tekst, der allerede står i feltet, og hvor markøren står</li>
+</ul>
+<p>Det bruges kun til at placere knappen og til at indsætte tekst det rigtige sted, når du trykker på knappen. Adgangskodefelter ignoreres.</p>
+</section>
+
+<section>
+<h2>Hvad Ordstriben gemmer</h2>
+<p>En lokal teknisk log på din telefon med navnene på de apps, knappen er brugt i, feltets tekniske type og om indsættelsen lykkedes. Loggen indeholder aldrig tekst fra felterne. Du kan rydde den i appen, og den slettes, når appen afinstalleres.</p>
+</section>
+
+<section>
+<h2>Hvad Ordstriben deler</h2>
+<p>Intet. Ordstriben har ikke adgang til internettet og sender ingen data fra telefonen. Der bruges ingen annoncer, analyseværktøjer eller tredjepartstjenester.</p>
+<p>Google Play bruges til at tilbyde opdateringer af appen. Det sker gennem Play Butik-appen på din telefon og efter Googles egne vilkår.</p>
+</section>
+
+<section>
+<h2>Dine valg</h2>
+<p>Du kan til enhver tid slå tjenesten fra under Indstillinger, Tilgængelighed, tilbagekalde samtykket i appen eller afinstallere appen.</p>
+</section>
+
+<section>
+<h2>Kontakt</h2>
+<p>Spørgsmål om privatliv kan sendes til <a href="mailto:kontakt@qdigital.dk">kontakt@qdigital.dk</a>.</p>
+</section>
+</main>
+</body>
+</html>
