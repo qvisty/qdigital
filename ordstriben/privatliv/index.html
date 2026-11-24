@@ -39,7 +39,8 @@
 <h2>Mikrofon og tale</h2>
 <p>Ordstriben bruger kun mikrofonen, når du selv har trykket på knappen, og knappen har en rød ring, så længe der lyttes. Et nyt tryk stopper optagelsen.</p>
 <p>Talen omsættes til tekst af talegenkendelsen på din telefon. Ordstriben beder om, at det sker uden internet, og sender ikke lyd eller tekst nogen steder hen. Lyden gemmes ikke af Ordstriben.</p>
-<p>Talegenkendelsen leveres af telefonens system, typisk Google eller telefonens producent, og er underlagt deres vilkår.</p>
+<p>Som standard bruger Ordstriben sin egen talemodel (Whisper), som kører helt på telefonen. Du kan i stedet vælge telefonens egen talegenkendelse, som leveres af telefonens system, typisk Google eller telefonens producent, og er underlagt deres vilkår.</p>
+<p>Talemodellen hentes én gang fra Hugging Face, når du selv trykker "Hent talemodel". Ved hentningen ser Hugging Face din IP-adresse, som ved ethvert besøg på en hjemmeside. Der sendes ingen lyd, tekst eller oplysninger om dig.</p>
 </section>
 
 <section>
@@ -56,7 +57,7 @@
 
 <section>
 <h2>Hvad Ordstriben deler</h2>
-<p>Ud over den frivillige tekniske log ovenfor deler Ordstriben intet. Tale og tekst sendes aldrig fra telefonen. Der bruges ingen annoncer, analyseværktøjer eller tredjepartstjenester.</p>
+<p>Ud over den frivillige tekniske log ovenfor og hentningen af talemodellen deler Ordstriben intet. Tale og tekst sendes aldrig fra telefonen. Der bruges ingen annoncer, analyseværktøjer eller tredjepartstjenester.</p>
 <p>Google Play bruges til at tilbyde opdateringer af appen. Det sker gennem Play Butik-appen på din telefon og efter Googles egne vilkår.</p>
 </section>
 
