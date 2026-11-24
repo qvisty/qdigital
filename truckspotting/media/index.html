@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Truckspotting medier</title>
+<meta name="description" content="Animation af Truckspotting til opslag i fora, mails og sociale medier.">
+<style>
+  :root { --bg: #ffffff; --fg: #1b1b1f; --muted: #5b5b66; --card: #f4f4f7; --line: #dcdce3; --accent: #c026d3; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #111116; --fg: #ececf1; --muted: #a4a4b0; --card: #1b1b22; --line: #2e2e38; --accent: #e879f9; } }
+  body { background: var(--bg); color: var(--fg); font: 16px/1.55 system-ui, sans-serif; margin: 0 auto; max-width: 44rem; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+  h2 { font-size: 1.15rem; margin-top: 1.8rem; }
+  .muted { color: var(--muted); }
+  hr { border: 0; border-top: 1px solid var(--muted); margin: 2.5rem 0; opacity: 0.4; }
+  a { color: inherit; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 16px; margin-top: 1rem; }
+  figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  figure img, figure video { display: block; width: 100%; height: auto; border-radius: 8px; background: #000; }
+  figcaption { margin-top: 10px; font-size: 0.9rem; }
+  figcaption strong { display: block; margin-bottom: 6px; }
+  .copy { display: flex; gap: 6px; margin-top: 6px; }
+  .copy input { flex: 1; min-width: 0; font: 0.8rem/1.4 ui-monospace, monospace; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); }
+  .copy button { font: 600 0.8rem system-ui, sans-serif; padding: 6px 10px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; white-space: nowrap; }
+  .copy button.done { background: #16a34a; }
+  .label { display: block; margin-top: 8px; color: var(--muted); font-size: 0.8rem; }
+</style>
+</head>
+<body>
+
+<h1>Truckspotting til opslag</h1>
+<p class="muted">Animation af søgeren fra appens forside. Udgiver: Q Digital. <a href="#en">English below</a>.</p>
+
+<h2>Sådan bruger du dem</h2>
+<p>Brug videoen til Facebook og Instagram. Den er skarpest og fylder mindst. Brug GIF'en i fora og mails, hvor video ikke vises. Kopiér adressen under filen, eller hent filen og læg den op selv. Du må gerne bruge dem, når du fortæller om Truckspotting.</p>
+
+<div class="grid">
+  <figure>
+    <video src="truckspotting_spot_da.mp4" controls loop muted autoplay playsinline width="540" height="450"></video>
+    <figcaption><strong>Video, dansk</strong>
+      <span class="copy"><input readonly value="https://qdigital.dk/truckspotting/media/truckspotting_spot_da.mp4" aria-label="Adresse"><button type="button">Kopiér</button></span>
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="truckspotting_spot_da.gif" alt="Animation af Truckspotting, dansk" width="540" height="450" loading="lazy">
+    <figcaption><strong>GIF, dansk</strong>
+      <span class="copy"><input readonly value="https://qdigital.dk/truckspotting/media/truckspotting_spot_da.gif" aria-label="Adresse"><button type="button">Kopiér</button></span>
+      <span class="label">BBCode til fora</span>
+      <span class="copy"><input readonly value="[img]https://qdigital.dk/truckspotting/media/truckspotting_spot_da.gif[/img]" aria-label="BBCode"><button type="button">Kopiér</button></span>
+    </figcaption>
+  </figure>
+</div>
+
+<hr>
+
+<h1 id="en">Truckspotting for posts</h1>
+<p class="muted">Animation of the viewfinder from the app's home screen. Publisher: Q Digital.</p>
+
+<h2>How to use them</h2>
+<p>Use the video for Facebook and Instagram. It is the sharpest and the smallest. Use the GIF in forums and emails, where video is not shown. Copy the address below the file, or download the file and upload it yourself. You are welcome to use them when you tell people about Truckspotting.</p>
+
+<div class="grid">
+  <figure>
+    <video src="truckspotting_spot_en.mp4" controls loop muted autoplay playsinline width="540" height="450"></video>
+    <figcaption><strong>Video, English</strong>
+      <span class="copy"><input readonly value="https://qdigital.dk/truckspotting/media/truckspotting_spot_en.mp4" aria-label="Address"><button type="button" data-done="Copied">Copy</button></span>
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="truckspotting_spot_en.gif" alt="Truckspotting animation, English" width="540" height="450" loading="lazy">
+    <figcaption><strong>GIF, English</strong>
+      <span class="copy"><input readonly value="https://qdigital.dk/truckspotting/media/truckspotting_spot_en.gif" aria-label="Address"><button type="button" data-done="Copied">Copy</button></span>
+      <span class="label">BBCode for forums</span>
+      <span class="copy"><input readonly value="[img]https://qdigital.dk/truckspotting/media/truckspotting_spot_en.gif[/img]" aria-label="BBCode"><button type="button" data-done="Copied">Copy</button></span>
+    </figcaption>
+  </figure>
+</div>
+
+<p class="muted" style="margin-top:2.5rem"><a href="https://play.google.com/store/apps/details?id=dk.qdigital.truckspotting&amp;referrer=utm_source%3Dqdigital">Truckspotting på Google Play</a> · <a href="/">qdigital.dk</a></p>
+
+<script>
+document.querySelectorAll('.copy button').forEach(function (b) {
+  var label = b.textContent;
+  b.addEventListener('click', function () {
+    var input = b.previousElementSibling;
+    function ok() {
+      b.textContent = b.dataset.done || 'Kopieret';
+      b.classList.add('done');
+      setTimeout(function () { b.textContent = label; b.classList.remove('done'); }, 1800);
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(input.value).then(ok, function () { input.select(); document.execCommand('copy'); ok(); });
+    } else { input.select(); document.execCommand('copy'); ok(); }
+  });
+});
+</script>
+</body>
+</html>
