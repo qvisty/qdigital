@@ -85,6 +85,15 @@ function norm(string $s): string {
     return preg_replace('/[^\p{L}\p{N}]+/u', '', mb_strtolower($s)) ?? '';
 }
 
+/** Som norm(), men uden ord som serie og model, så "S Model" og "S serie" er den samme. Som modelKey i appen. */
+function model_key(string $s): string {
+    $generic = ['serie', 'serien', 'series', 'model', 'modellen', 'modell', 'models', 'reihe', 'baureihe', 'type', 'typ'];
+    $words = preg_split('/[^\p{L}\p{N}+]+/u', mb_strtolower($s), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    $kept = array_filter($words, fn ($w) => !in_array($w, $generic, true));
+    $key = norm(str_replace('+', 'plus', implode(' ', $kept)));
+    return $key !== '' ? $key : norm(str_replace('+', 'plus', $s));
+}
+
 /** Appens katalog. Kopien katalog.json skal være den samme som i appen, det tjekker en test i repoet. */
 function catalog(): array {
     static $brands = null;
@@ -111,11 +120,15 @@ function lookup(string $brand, string $model): array {
     }
     if ($found === null) return ['new', 'Nyt mærke. Findes ikke i appen.'];
     $similar = [];
+    $mk = model_key($model);
     foreach ($found['models'] ?? [] as $cm) {
         $names = array_filter([norm((string) ($cm['name'] ?? '')), norm((string) ($cm['nameEn'] ?? ''))]);
+        $keys = array_filter([model_key((string) ($cm['name'] ?? '')), model_key((string) ($cm['nameEn'] ?? ''))]);
         $label = $found['name'] . ' ' . ($cm['name'] ?? '') . ' (' . (RARITY[$cm['rarity'] ?? ''] ?? '') . ')';
         if ($m !== '' && in_array($m, $names, true)) return ['have', 'Findes allerede i appen: ' . $label];
-        foreach ($names as $n) {
+        // Samme model med et andet ord, fx "S Model" for "S serie"
+        if ($mk !== '' && in_array($mk, $keys, true)) return ['have', 'Findes allerede i appen: ' . $label];
+        foreach (array_merge($names, $keys) as $n) {
             if ($m !== '' && (str_contains($n, $m) || str_contains($m, $n))) { $similar[] = $label; break; }
         }
     }
