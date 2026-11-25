@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ordstriben: dansk tale til tekst på Android</title>
+<meta name="description" content="Ordstriben er dansk diktering på Android, i alle apps. Tryk på boblen ved tekstfeltet, tal dansk, og teksten sættes ind. Talen omsættes på telefonen og sendes aldrig.">
+<meta name="theme-color" content="#DCEEFB">
+<link rel="canonical" href="https://qdigital.dk/ordstriben/">
+<meta property="og:title" content="Ordstriben: dansk tale til tekst på Android">
+<meta property="og:description" content="Dansk diktering dér, hvor du skriver. Talen omsættes på telefonen og sendes aldrig.">
+<meta property="og:image" content="https://qdigital.dk/ordstriben/img/play-grafik-1024x500.png">
+<link rel="icon" href="img/ikon-A.svg" type="image/svg+xml">
+<style>
+  :root { color-scheme: light dark; --bg:#F7FBFE; --fg:#1E3A5F; --muted:#3F6488; --card:#FFFFFF; --line:#D2E8F9; --accent:#5FA8E0; --soft:#DCEEFB; --green:#22A35A; --yellow:#E8B220; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#10233A; --fg:#EAF5FD; --muted:#B9DCF5; --card:#16304F; --line:#2A4A70; --soft:#16304F; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color:inherit; }
+  .wrap { max-width:960px; margin:0 auto; padding:0 16px; }
+  .top { display:flex; justify-content:space-between; align-items:center; padding:18px 0; font-size:15px; }
+  .top a { text-decoration:none; color:var(--muted); }
+  .top b { color:var(--fg); }
+  .hero { background:linear-gradient(180deg, var(--soft), var(--bg)); padding-bottom:40px; }
+  .hero-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:32px; align-items:center; padding-top:16px; }
+  .app-id { display:flex; align-items:center; gap:16px; }
+  .app-id img { width:84px; height:84px; border-radius:22px; box-shadow:0 6px 20px rgba(30,58,95,.15); }
+  h1 { font-size:40px; line-height:1.1; margin:0; }
+  .sub { color:var(--muted); font-size:18px; }
+  .lead { font-size:20px; margin:22px 0; }
+  .status { display:inline-flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:8px 16px; font-weight:600; }
+  .status i { width:10px; height:10px; border-radius:50%; background:var(--yellow); display:inline-block; }
+  .badges { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .play { display:inline-flex; align-items:center; gap:8px; background:var(--fg); color:var(--bg); border-radius:999px; padding:8px 18px; font-weight:600; text-decoration:none; }
+  .play svg { width:16px; height:16px; }
+  .status-note { display:block; margin-top:10px; color:var(--muted); font-size:15px; }
+  .demo { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px; box-shadow:0 10px 30px rgba(30,58,95,.10); }
+  .field { border:1px solid var(--line); border-radius:12px; padding:12px 14px; min-height:84px; font-size:16px; position:relative; }
+  .field .label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+  .cursor { display:inline-block; width:2px; height:1.1em; background:var(--accent); vertical-align:-2px; animation:blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  .bubble-row { display:flex; justify-content:flex-end; margin-top:12px; }
+  .bubble { width:56px; height:56px; border-radius:50%; background:var(--soft); display:grid; place-items:center; position:relative; }
+  .bubble svg.waves { width:30px; height:30px; }
+  .bubble svg.ring { position:absolute; inset:-4px; width:64px; height:64px; transform:rotate(-90deg); }
+  .demo-caption { margin:12px 0 0; font-size:14px; color:var(--muted); }
+  h2 { font-size:26px; margin:48px 0 16px; }
+  .steps { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px 20px; }
+  .card h3 { margin:0 0 6px; font-size:18px; }
+  .card p { margin:0; color:var(--muted); font-size:16px; }
+  .num { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--soft); color:var(--fg); font-weight:700; margin-bottom:8px; }
+  .rings { display:flex; flex-wrap:wrap; gap:14px; margin-top:16px; }
+  .rings span { display:inline-flex; align-items:center; gap:8px; font-size:15px; color:var(--muted); }
+  .rings b { width:16px; height:16px; border-radius:50%; border:3px solid; display:inline-block; }
+  .features { display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; }
+  .privacy { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:6px 22px 14px; }
+  .privacy ul { padding-left:20px; margin:8px 0; }
+  .privacy li { margin:6px 0; }
+  .muted { color:var(--muted); }
+  .foot { margin-top:56px; border-top:1px solid var(--line); padding:22px 0 40px; font-size:14px; color:var(--muted); }
+  .foot .wrap { display:flex; flex-wrap:wrap; gap:8px 24px; justify-content:space-between; }
+  .credit { font-size:14px; color:var(--muted); margin-top:28px; }
+  @media (max-width: 760px) {
+    h1 { font-size:32px; }
+    .lead { font-size:18px; }
+    .hero-grid { grid-template-columns:1fr; }
+    .steps, .features { grid-template-columns:1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation:none; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="top">
+      <a href="/"><b>Q</b> Digital</a>
+      <a href="privatliv/">Privatliv</a>
+    </div>
+    <div class="hero-grid">
+      <div>
+        <div class="app-id"><img src="img/ikon-A.svg" width="84" height="84" alt=""><div><h1>Ordstriben</h1><div class="sub">Dansk diktering dér, hvor du skriver</div></div></div>
+        <p class="lead">Tal dansk i alle apps på din Android telefon. Tryk på boblen ved tekstfeltet, sig det, du vil skrive, og teksten sættes ind ved markøren.</p>
+        <div class="badges">
+          <span class="status"><i></i>Under test</span>
+          <a class="play" href="https://play.google.com/store/apps/details?id=dk.ordstriben.app&amp;referrer=utm_source%3Dqdigital"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 9-14 9z" fill="currentColor"/></svg>Google Play</a>
+        </div>
+        <span class="status-note">Ordstriben er i lukket test og kommer snart til alle på Android. Indtil da virker linket til Google Play kun for testere.</span>
+      </div>
+      <div class="demo" aria-label="Eksempel på Ordstriben i en besked">
+        <div class="field"><span class="label">Besked</span>Jeg er hjemme om en halv time, skal jeg købe mælk med<span class="cursor"></span></div>
+        <div class="bubble-row">
+          <div class="bubble">
+            <svg class="ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#22A35A" stroke-width="4" stroke-linecap="round" stroke-dasharray="182" stroke-dashoffset="50"/></svg>
+            <svg class="waves" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke-linecap="round" stroke-width="48"><path d="M120 200 C160 150 210 150 256 200 S352 250 392 200" stroke="#5FA8E0"/><path d="M120 312 C160 262 210 262 256 312 S352 362 392 312" stroke="#9CCBEF"/></g></svg>
+          </div>
+        </div>
+        <p class="demo-caption">Boblen ligger ved feltet. Den grønne ring fyldes, når du holder en pause.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2>Sådan virker det</h2>
+  <div class="steps">
+    <div class="card"><span class="num">1</span><h3>Tryk på boblen</h3><p>En lille boble dukker op ved det felt, du skriver i, fx i Gmail, Beskeder eller Chrome.</p></div>
+    <div class="card"><span class="num">2</span><h3>Tal dansk</h3><p>Ringen om boblen er grøn, mens Ordstriben lytter. Ved en pause fyldes den grønt og stopper af sig selv.</p></div>
+    <div class="card"><span class="num">3</span><h3>Teksten kommer</h3><p>Ringen bliver gul, mens teksten skrives. Når ringen er fuld, står teksten ved markøren.</p></div>
+  </div>
+  <div class="rings" aria-hidden="true">
+    <span><b style="border-color:var(--green)"></b>Lytter</span>
+    <span><b style="border-color:var(--yellow)"></b>Skriver teksten</span>
+  </div>
+
+  <h2>Det får du</h2>
+  <div class="features">
+    <div class="card"><h3>Trænet på dansk</h3><p>Talemodellen er en dansk udgave af Whisper. Den forstår dansk langt bedre end den generelle model.</p></div>
+    <div class="card"><h3>Hukommelse</h3><p>Find dine seneste dikteringer og kopiér dem igen. De ligger kun på telefonen, slettes efter 30 dage og kan slås fra.</p></div>
+    <div class="card"><h3>Egen ordliste</h3><p>Lær Ordstriben de navne og stednavne, du bruger, så de bliver stavet rigtigt.</p></div>
+    <div class="card"><h3>Genveje</h3><p>Sig fx "min adresse", og din adresse sættes ind.</p></div>
+    <div class="card"><h3>Uden øh</h3><p>Fyldord som "øh" fjernes, så teksten er klar til at sende.</p></div>
+    <div class="card"><h3>Statistik</h3><p>Se antal ord, ord pr. minut, en graf for ugen og din stribe af dage.</p></div>
+    <div class="card"><h3>Som du vil have det</h3><p>Vælg selv, hvor boblen skal ligge, og hvilket ikon appen skal have.</p></div>
+  </div>
+
+  <h2>Privatliv</h2>
+  <div class="privacy">
+    <ul>
+      <li>Talen omsættes til tekst på telefonen. Lyd og tekst sendes aldrig fra telefonen.</li>
+      <li>Talemodellen hentes én gang, når du selv vælger det.</li>
+      <li>Adgangskodefelter ignoreres.</li>
+      <li>Ingen konto, ingen reklamer og ingen analyseværktøjer.</li>
+    </ul>
+    <p class="muted">Læs hele <a href="privatliv/">privatlivspolitikken</a>.</p>
+  </div>
+
+  <h2>Kontakt</h2>
+  <p>Spørgsmål og forslag er velkomne på <a href="mailto:kontakt@qdigital.dk">kontakt@qdigital.dk</a>.</p>
+
+  <p class="credit">Talemodellerne bygger på whisper-small-danish og whisper-large-v3-turbo-danish af Thor Højhus Avenstrup Jensen, som bygger på OpenAI Whisper. Begge er udgivet under MIT licensen.</p>
+</main>
+
+<footer class="foot"><div class="wrap"><span>Ordstriben er lavet af <a href="/"><b>Q</b> Digital</a></span><span>CVR 46418840. Aabenraa, Danmark.</span></div></footer>
+</body>
+</html>
