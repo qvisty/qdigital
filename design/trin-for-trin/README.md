@@ -1,4 +1,6 @@
-# Trin for trin
+# Trin for trin (trinkort)
+
+Jesper kalder den **trinkort**, ligesom valgkort. Beder han om trinkort, så brug den her.
 
 En kortbunke, som guider Jesper gennem en opgave i fx Google Search Console, Play Console eller Simply. Hvert kort har ét trin med stor tekst. Han swiper eller bladrer, krydser trin af og kan sende en besked til Claude fra hvert kort.
 
