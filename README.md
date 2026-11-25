@@ -74,7 +74,7 @@ Trinkort er kortbunken til vejledninger trin for trin. Hver session har sit eget
 
 `ordstriben/stats/index.php` tager imod brugsstatistik fra Ordstriben, når brugeren selv har sagt ja. Kun tal: ingen tekst, ingen lyd og ingen navne på apps.
 
-1. `POST` med JSON `{"user","version","events"}` gemmer i `ordstriben-data/stats/` uden for `public_html`, én fil pr. bruger id. Højst 64 KB og 500 hændelser pr. kald. Hver hændelse har præcis felterne `t`, `kind`, `lang`, `engine`, `ok`, `error`, `audio_ms`, `wait_ms`, `words`, `chars`, `mode` og `fallback`. Den samme hændelse tæller kun én gang. Svar 204.
+1. `POST` med JSON `{"user","version","events"}` gemmer i `ordstriben-data/stats/` uden for `public_html`, én fil pr. bruger id. Højst 64 KB og 500 hændelser pr. kald. Hver hændelse har præcis felterne `t`, `kind`, `lang`, `engine`, `ok`, `error`, `audio_ms`, `wait_ms`, `words`, `chars`, `mode` og `fallback`. Det valgfrie felt `count` (1 til 10000) siger, hvor mange dikteringer én linje dækker, fx en samlet linje pr. dag fra historikken før samtykket. Historik har `wait_ms` 0 og tæller ikke med i ventetiden. Den samme hændelse tæller kun én gang. Svar 204.
 2. `DELETE ?user=<uuid>` sletter alt for det bruger id. Svar 204.
 3. `GET ?summary` giver tallene til dashboardet `ordstriben/tal/`: totaler og gennemsnit pr. bruger, rundet ned til to betydende cifre, samt rater og andele. Antallet af brugere gives aldrig ud. Et tal med færre end 5 brugere bag gives som null. Tallene regnes højst hvert 5. minut.
 4. `GET` med headeren `X-Api-Key` giver de rå data. Det er samme nøgle som loggen, `ORDSTRIBEN_LOG_API_HASH`.

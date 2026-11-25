@@ -28,6 +28,8 @@ const TYPING_WPM = 38;
 const UUID_RE = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/';
 const VERSION_RE = '/^[0-9][0-9A-Za-z.+-]{0,31}$/';
 const EVENT_KEYS = ['t', 'kind', 'lang', 'engine', 'ok', 'error', 'audio_ms', 'wait_ms', 'words', 'chars', 'mode', 'fallback'];
+/** Valgfrit felt: hvor mange dikteringer én linje dækker, fx en samlet linje pr. dag fra historikken. Standard 1. */
+const OPTIONAL_KEYS = ['count'];
 
 function reply(int $code, ?array $body = null, int $cache = 0): never {
     http_response_code($code);
@@ -118,7 +120,8 @@ function int_in(mixed $v, int $min, int $max): bool {
 /** Én hændelse præcis efter kontrakten, eller null. */
 function valid_event(mixed $e): ?array {
     if (!is_array($e) || array_is_list($e)) return null;
-    foreach (array_keys($e) as $k) if (!in_array($k, EVENT_KEYS, true)) return null;
+    foreach (array_keys($e) as $k) if (!in_array($k, EVENT_KEYS, true) && !in_array($k, OPTIONAL_KEYS, true)) return null;
+    if (array_key_exists('count', $e) && !int_in($e['count'], 1, 10000)) return null;
     $t = $e['t'] ?? null;
     if (!is_string($t) || preg_match('/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/', $t) !== 1) return null;
     $ts = strtotime($t);
@@ -134,6 +137,7 @@ function valid_event(mixed $e): ?array {
     if (!in_array($e['mode'] ?? null, ['DIRECT', 'WINDOW'], true)) return null;
     $out = [];
     foreach (EVENT_KEYS as $k) $out[$k] = $e[$k];
+    if (array_key_exists('count', $e) && $e['count'] !== 1) $out['count'] = $e['count'];
     return $out;
 }
 
@@ -207,7 +211,7 @@ function rough(float $n): int {
  */
 function summary(string $dir): array {
     $users = 0; $usersWithOk = 0;
-    $events = 0; $ok = 0; $files = 0; $words = 0; $chars = 0; $audio = 0; $wait = 0;
+    $events = 0; $ok = 0; $dict = 0; $files = 0; $fileChars = 0; $fileAudio = 0; $words = 0; $chars = 0; $audio = 0; $wait = 0; $waitN = 0;
     $lang = []; $engine = [];
     foreach (glob($dir . '/u_*.json') ?: [] as $f) {
         $d = json_decode((string) file_get_contents($f), true);
@@ -221,7 +225,11 @@ function summary(string $dir): array {
             $ue[$e['engine']] = true;
             if ($e['ok']) {
                 $ok++; $hadOk = true;
-                $words += $e['words']; $chars += $e['chars']; $audio += $e['audio_ms']; $wait += $e['wait_ms'];
+                $dict += (int) ($e['count'] ?? 1);
+                if ($e['kind'] === 'file') { $fileChars += $e['chars']; $fileAudio += $e['audio_ms']; }
+                $words += $e['words']; $chars += $e['chars']; $audio += $e['audio_ms'];
+                // Historik fra før samtykket har ventetid 0 og tæller ikke med i ventetiden
+                if ($e['wait_ms'] > 0) { $wait += $e['wait_ms']; $waitN++; }
             }
         }
         if ($hadOk) $usersWithOk++;
@@ -247,19 +255,24 @@ function summary(string $dir): array {
         'min_users' => MIN_USERS,
         'enough' => $enough,
         'total' => [
-            'dictations' => $enough ? rough($ok) : null,
+            'dictations' => $enough ? rough($dict) : null,
+            'minutes_spoken' => $enough ? rough($audio / 60000) : null,
             'words' => $enough ? rough($words) : null,
             'keystrokes_saved' => $enough ? rough($chars) : null,
             'minutes_saved' => $enough ? rough($savedMin) : null,
+            'file_chars' => $enough ? rough($fileChars) : null,
+            'file_minutes' => $enough ? rough($fileAudio / 60000) : null,
         ],
         'per_user' => [
-            'dictations' => $per ? rough($ok / $usersWithOk) : null,
+            'dictations' => $per ? rough($dict / $usersWithOk) : null,
+            'minutes_spoken' => $per ? rough($audio / 60000 / $usersWithOk) : null,
             'words' => $per ? rough($words / $usersWithOk) : null,
             'keystrokes_saved' => $per ? rough($chars / $usersWithOk) : null,
             'minutes_saved' => $per ? rough($savedMin / $usersWithOk) : null,
+            'file_chars' => $per ? rough($fileChars / $usersWithOk) : null,
         ],
         'words_per_minute' => $enough && $audio > 0 ? round($words / ($audio / 60000), 1) : null,
-        'avg_wait_ms' => $enough && $ok > 0 ? (int) round($wait / $ok) : null,
+        'avg_wait_ms' => $enough && $waitN > 0 ? (int) round($wait / $waitN) : null,
         'success_rate' => $enough ? ratio($ok, $events) : null,
         'file_share' => $enough ? ratio($files, $events) : null,
         'languages' => $dist($lang),
