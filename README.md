@@ -52,3 +52,16 @@ Læg aldrig CPR, fuld adresse, telefonnummer, kontonumre, kortnumre eller adgang
 3. `GET ?since=<ISO tid>` kræver headeren `X-Api-Key`. Kun sha256 af nøglen ligger i hemmeligheden `ORDSTRIBEN_LOG_API_HASH`, og udgivelsen skriver den i `ordstriben-data/config.php`.
 4. Data ældre end 30 dage slettes. Grænser pr. afsender tælles med en saltet hash, og IP adresser gemmes aldrig. Findes filen `ordstriben-data/log/lukket`, svarer alle kald 503.
 5. `tests/ordstriben-log.sh` tester det hele lokalt med PHP. Kør den før hver ændring.
+
+## SEO
+
+qdigital.dk har `robots.txt`, `sitemap.xml`, `llms.txt`, `og-image.png` (1200 x 630), `logo-512.png`, `404.html` og `.htaccess`, som sender www videre til adressen uden www og `index.html` til mappen. Tilføjes en ny offentlig side, så skal den også i `sitemap.xml` og gerne i `llms.txt`. Lukkede adresser som modtagere til apps står under Disallow i `robots.txt`. Google Search Console er bekræftet med filen `google4100578d9f47f678.html`, som ikke må slettes.
+
+### Tjekliste, når et andet produkt går live
+
+Noteret 25. november 2026. Ret disse ting, når produktet er færdigt og udgives:
+
+1. **censorfordeling.dk**: canonical og `og:image` peger på `staging.censorfordeling.dk`. De skal pege på `censorfordeling.dk`. Der mangler `sitemap.xml` og strukturerede data, og beskrivelsen er kort.
+2. **mitcv.com**: siden sender videre til `www.mitcv.com`, men canonical og sitemap bruger `mitcv.com` uden www. Vælg én adresse alle steder. `og:image` mangler, og `/llms.txt` giver en almindelig side med `lang="llms.txt"` i stedet for en 404 eller en rigtig fil.
+3. **Rattid**: der mangler canonical og `sitemap.xml`, og `og:image` er et lånt pegasus billede fra Wikimedia. Vælg den endelige adresse, fx rattid.mitcv.com eller et eget domæne.
+4. For alle: tilføj domænet i Google Search Console og Bing Webmaster Tools, send sitemap ind, og tillad AI crawlere i `robots.txt` på de offentlige sider.

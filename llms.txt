@@ -1,0 +1,21 @@
+# Q Digital
+
+> Q Digital er en dansk enkeltmandsvirksomhed i Aabenraa, CVR 46418840. Q Digital udvikler og driver hjemmesider og apps til skoler, institutioner og privatpersoner. Kontakt: kontakt@qdigital.dk.
+
+## Hjemmeside
+
+- [Forside på dansk](https://qdigital.dk/): Oversigt over Q Digitals hjemmesider, systemer og Android apps.
+- [Forside på engelsk](https://qdigital.dk/en/): The same overview in English.
+
+## Android apps
+
+- [Ordstriben](https://qdigital.dk/ordstriben/): Dansk tale til tekst i alle apps på Android. Talen omsættes på telefonen og sendes aldrig. Under test.
+- [Crowns](https://qdigital.dk/crowns/): Roligt dagligt logikspil. Placer én krone i hver række, kolonne og farve.
+- [Truckspotting](https://play.google.com/store/apps/details?id=dk.qdigital.truckspotting): Spil, hvor man spotter lastbiler og samler modellerne.
+- [Pocket SSH Terminal](https://play.google.com/store/apps/details?id=dk.pocketssh): SSH terminal til Android uden konto og uden sky.
+
+## Privatliv
+
+- [Ordstriben privatliv](https://qdigital.dk/ordstriben/privatliv/)
+- [Truckspotting privatliv](https://qdigital.dk/truckspotting/privatliv/)
+- [Crowns privacy policy](https://qdigital.dk/crowns/privacy-policy/)

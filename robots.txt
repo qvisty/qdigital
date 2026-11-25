@@ -1,0 +1,8 @@
+# qdigital.dk. Alle søgemaskiner og AI crawlere må læse de offentlige sider.
+User-agent: *
+Disallow: /api/
+Disallow: /truckspotting/forslag/
+Disallow: /truckspotting/venner/
+Disallow: /ordstriben/log/
+
+Sitemap: https://qdigital.dk/sitemap.xml
