@@ -37,7 +37,7 @@
 
 <section>
 <h2>Mikrofon og tale</h2>
-<p>Ordstriben bruger kun mikrofonen, når du selv har trykket på knappen, og knappen har en rød ring, så længe der lyttes. Et nyt tryk stopper optagelsen.</p>
+<p>Ordstriben bruger kun mikrofonen, når du selv har trykket på knappen, og knappen har en grøn ring, så længe der lyttes. Et nyt tryk stopper optagelsen.</p>
 <p>Talen omsættes til tekst af talegenkendelsen på din telefon. Ordstriben beder om, at det sker uden internet, og sender ikke lyd eller tekst nogen steder hen. Lyden gemmes ikke af Ordstriben.</p>
 <p>Som standard bruger Ordstriben sin egen talemodel (Whisper), som kører helt på telefonen. Du kan i stedet vælge telefonens egen talegenkendelse, som leveres af telefonens system, typisk Google eller telefonens producent, og er underlagt deres vilkår.</p>
 <p>Talemodellen hentes én gang fra Hugging Face, når du selv trykker "Hent talemodel". Ved hentningen ser Hugging Face din IP-adresse, som ved ethvert besøg på en hjemmeside. Der sendes ingen lyd, tekst eller oplysninger om dig.</p>
@@ -46,6 +46,10 @@
 <section>
 <h2>Hvad Ordstriben gemmer</h2>
 <p>En lokal teknisk log på din telefon med navnene på de apps, knappen er brugt i, feltets tekniske type, om indsættelsen lykkedes, og hvor lang tid talegenkendelsen tog og hvor mange tegn den gav. Loggen indeholder aldrig tekst fra felterne, lyd eller det, du har sagt. Du kan rydde den i appen, og den slettes, når appen afinstalleres.</p>
+<p>Hukommelse: den tekst, du dikterer, gemmes på din telefon i Ordstribens private mappe, så du kan finde og kopiere den igen. Den slettes automatisk efter 30 dage. Du kan slå hukommelsen fra og slette den hele på forsiden. Den sendes aldrig fra telefonen og kommer aldrig med i den tekniske log.</p>
+<p>Statistik: antal ord, antal tegn og taletid pr. dag, uden selve teksten.</p>
+<p>Ordliste og genveje: de rettelser og tekster, du selv skriver ind, gemmes på telefonen.</p>
+<p>Alt slettes, når appen afinstalleres.</p>
 </section>
 
 <section>
