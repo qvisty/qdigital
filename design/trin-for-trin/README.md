@@ -15,6 +15,7 @@ Kendte trinkort:
 | qdigital.dk hjemmeside, udgiver til Simply | https://claude.ai/artifact/Vv4xmeeLDoqvnjLh5jk8BT |
 | TS Projekt kvalificering og udvikling (Truckspotting) | https://claude.ai/artifact/BZdkK499mQKXtWkRuLCxuU |
 | OS Svensk talemodel til Hugging Face (Ordstriben) | https://claude.ai/artifact/55f7iRe1yC8QiVkT5fCzN4 |
+| OS Status (Ordstriben) | https://claude.ai/artifact/XFcf1bC5BpQEu55xLLQCae |
 
 ## Sådan får en session sit eget trinkort
 
