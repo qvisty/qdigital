@@ -1,0 +1,11 @@
+# qdigital.dk. Én adresse for hver side.
+# Simply sender selv http videre til https, så her er kun www og index.html.
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.qdigital\.dk$ [NC]
+RewriteRule ^ https://qdigital.dk%{REQUEST_URI} [R=301,L]
+
+# /index.html og /en/index.html peger på mappen selv
+RewriteCond %{THE_REQUEST} \s/((?:[^\s?]*/)?)index\.html[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+ErrorDocument 404 /404.html

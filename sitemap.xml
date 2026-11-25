@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://qdigital.dk/</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="da" href="https://qdigital.dk/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://qdigital.dk/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qdigital.dk/"/>
+  </url>
+  <url>
+    <loc>https://qdigital.dk/en/</loc>
+    <lastmod>2026-11-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="da" href="https://qdigital.dk/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://qdigital.dk/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qdigital.dk/"/>
+  </url>
+  <url>
+    <loc>https://qdigital.dk/crowns/</loc>
+    <lastmod>2026-11-04</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://qdigital.dk/crowns/"/>
+    <xhtml:link rel="alternate" hreflang="da" href="https://qdigital.dk/crowns/da/"/>
+  </url>
+  <url>
+    <loc>https://qdigital.dk/crowns/da/</loc>
+    <lastmod>2026-11-04</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://qdigital.dk/crowns/"/>
+    <xhtml:link rel="alternate" hreflang="da" href="https://qdigital.dk/crowns/da/"/>
+  </url>
+  <url>
+    <loc>https://qdigital.dk/crowns/privacy-policy/</loc>
+    <lastmod>2026-10-28</lastmod>
+  </url>
+  <url>
+    <loc>https://qdigital.dk/ordstriben/</loc>
+    <lastmod>2026-11-25</lastmod>
+  </url>
+  <url>
+    <loc>https://qdigital.dk/ordstriben/privatliv/</loc>
+    <lastmod>2026-11-25</lastmod>
+  </url>
+  <url>
+    <loc>https://qdigital.dk/truckspotting/media/</loc>
+    <lastmod>2026-11-24</lastmod>
+  </url>
+  <url>
+    <loc>https://qdigital.dk/truckspotting/privatliv/</loc>
+    <lastmod>2026-11-14</lastmod>
+  </url>
+</urlset>
