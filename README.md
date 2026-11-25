@@ -76,7 +76,7 @@ Trinkort er kortbunken til vejledninger trin for trin. Hver session har sit eget
 
 1. `POST` med JSON `{"user","version","events"}` gemmer i `ordstriben-data/stats/` uden for `public_html`, én fil pr. bruger id. Højst 64 KB og 500 hændelser pr. kald. Hver hændelse har præcis felterne `t`, `kind`, `lang`, `engine`, `ok`, `error`, `audio_ms`, `wait_ms`, `words`, `chars`, `mode` og `fallback`. Den samme hændelse tæller kun én gang. Svar 204.
 2. `DELETE ?user=<uuid>` sletter alt for det bruger id. Svar 204.
-3. `GET ?summary` giver de samlede tal til dashboardet `ordstriben/tal/`. Et tal med færre end 5 brugere bag gives som null. Tallene regnes højst hvert 5. minut.
+3. `GET ?summary` giver tallene til dashboardet `ordstriben/tal/`: totaler og gennemsnit pr. bruger, rundet ned til to betydende cifre, samt rater og andele. Antallet af brugere gives aldrig ud. Et tal med færre end 5 brugere bag gives som null. Tallene regnes højst hvert 5. minut.
 4. `GET` med headeren `X-Api-Key` giver de rå data. Det er samme nøgle som loggen, `ORDSTRIBEN_LOG_API_HASH`.
 5. Data ældre end 13 måneder slettes. IP adresser gemmes aldrig. Findes filen `ordstriben-data/stats/lukket`, svarer alle kald 503.
 6. `tests/ordstriben-stats.sh` tester det hele lokalt med PHP.

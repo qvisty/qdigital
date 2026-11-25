@@ -31,6 +31,7 @@
   .tile.hero-tile .num { color:var(--accent); }
   h2 { font-size:22px; margin:40px 0 14px; }
   .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+  .grid.four { grid-template-columns:repeat(4, 1fr); }
   .pending { color:var(--muted); font-size:15px !important; font-weight:500 !important; }
   .bars { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
   .bar { display:grid; grid-template-columns:minmax(0, 9rem) 1fr auto; gap:12px; align-items:center; font-size:15px; }
@@ -43,7 +44,7 @@
   .foot .wrap { display:flex; flex-wrap:wrap; gap:8px 24px; justify-content:space-between; }
   @media (max-width: 760px) {
     h1 { font-size:30px; }
-    .big, .grid { grid-template-columns:1fr 1fr; }
+    .big, .grid, .grid.four { grid-template-columns:1fr 1fr; }
     .two { grid-template-columns:1fr; }
   }
 </style>
@@ -55,25 +56,25 @@
     <h1>Ordstriben i tal</h1>
     <p class="lead">Så meget bliver der talt i stedet for tastet. Tallene kommer kun fra brugere, der selv har sagt ja, og de er altid samlet for mange brugere.</p>
     <div class="big">
-      <div class="tile hero-tile"><div class="num" data-k="words">…</div><div class="lbl">ord dikteret</div></div>
-      <div class="tile hero-tile"><div class="num" data-k="keystrokes_saved">…</div><div class="lbl">tastetryk sparet</div></div>
-      <div class="tile hero-tile"><div class="num" data-k="minutes_saved">…</div><div class="lbl">sparet tid</div></div>
+      <div class="tile hero-tile"><div class="num" data-k="total.words">…</div><div class="lbl">ord dikteret i alt</div></div>
+      <div class="tile hero-tile"><div class="num" data-k="total.keystrokes_saved">…</div><div class="lbl">tastetryk sparet i alt</div></div>
+      <div class="tile hero-tile"><div class="num" data-k="total.minutes_saved">…</div><div class="lbl">sparet tid i alt</div></div>
     </div>
   </div>
 </header>
 
 <main class="wrap">
-  <h2>Brugere</h2>
-  <div class="grid">
-    <div class="tile"><div class="num" data-k="users.today">…</div><div class="lbl">i dag</div></div>
-    <div class="tile"><div class="num" data-k="users.week">…</div><div class="lbl">de seneste 7 dage</div></div>
-    <div class="tile"><div class="num" data-k="users.total">…</div><div class="lbl">i alt</div></div>
+  <h2>Gevinsten pr. bruger</h2>
+  <div class="grid four">
+    <div class="tile"><div class="num" data-k="per_user.words">…</div><div class="lbl">ord dikteret</div></div>
+    <div class="tile"><div class="num" data-k="per_user.keystrokes_saved">…</div><div class="lbl">tastetryk sparet</div></div>
+    <div class="tile"><div class="num" data-k="per_user.minutes_saved">…</div><div class="lbl">tid sparet</div></div>
+    <div class="tile"><div class="num" data-k="per_user.dictations">…</div><div class="lbl">dikteringer</div></div>
   </div>
 
   <h2>Diktering</h2>
   <div class="grid">
-    <div class="tile"><div class="num" data-k="dictations">…</div><div class="lbl">dikteringer</div></div>
-    <div class="tile"><div class="num" data-k="words_per_user">…</div><div class="lbl">ord pr. bruger i gennemsnit</div></div>
+    <div class="tile"><div class="num" data-k="total.dictations">…</div><div class="lbl">dikteringer i alt</div></div>
     <div class="tile"><div class="num" data-k="words_per_minute">…</div><div class="lbl">ord pr. minut, når der tales</div></div>
     <div class="tile"><div class="num" data-k="avg_wait_ms">…</div><div class="lbl">ventetid på teksten i gennemsnit</div></div>
     <div class="tile"><div class="num" data-k="success_rate">…</div><div class="lbl">lykkes</div></div>
@@ -85,7 +86,7 @@
     <div><h2>Talemodel</h2><div class="bars" id="engines"><span class="pending">Henter</span></div></div>
   </div>
 
-  <p class="note">Sparet tid regnes som tiden, det ville tage at skrive ordene på 38 ord i minuttet, minus den tid, der blev talt. Et tal vises først, når mindst <span id="min">5</span> brugere står bag. Appen sender aldrig tekst, lyd eller navne på apps. Læs mere i <a href="../privatliv/">privatlivspolitikken</a>. <span id="updated"></span></p>
+  <p class="note">Sparet tid regnes som tiden, det ville tage at skrive ordene på 38 ord i minuttet, minus den tid, der blev talt. Tal i alt og pr. bruger er rundet ned til to betydende cifre. Et tal vises først, når mindst <span id="min">5</span> brugere står bag. Appen sender aldrig tekst, lyd eller navne på apps. Læs mere i <a href="../privatliv/">privatlivspolitikken</a>. <span id="updated"></span></p>
 </main>
 
 <footer class="foot"><div class="wrap"><span>Ordstriben er lavet af <a href="/"><b>Q</b> Digital</a></span><span>CVR 46418840. Aabenraa, Danmark.</span></div></footer>
@@ -98,7 +99,7 @@
   function get(o, path) { return path.split(".").reduce(function (a, k) { return a == null ? a : a[k]; }, o); }
   function fmt(k, v) {
     if (v === null || v === undefined) return null;
-    if (k === "minutes_saved") return v >= 120 ? nf.format(Math.round(v / 60)) + " timer" : nf.format(v) + " min";
+    if (k === "minutes_saved") return v >= 120 ? nf.format(Math.floor(v / 60)) + " timer" : nf.format(v) + " min";
     if (k === "avg_wait_ms") return (v / 1000).toLocaleString("da-DK", { maximumFractionDigits: 1 }) + " sek";
     if (k === "success_rate" || k === "file_share") return Math.round(v * 100) + " %";
     if (k === "words_per_minute") return v.toLocaleString("da-DK", { maximumFractionDigits: 0 });
@@ -109,14 +110,13 @@
     if (!data || !Object.keys(data).length) {
       var p = document.createElement("span"); p.className = "pending"; p.textContent = "Kommer, når der er brugere nok"; el.appendChild(p); return;
     }
-    var total = Object.keys(data).reduce(function (s, k) { return s + data[k]; }, 0);
     Object.keys(data).forEach(function (k) {
       var row = document.createElement("div"); row.className = "bar";
       var name = document.createElement("span"); name.textContent = names[k] || k;
       var track = document.createElement("div"); track.className = "track";
-      var fill = document.createElement("div"); fill.className = "fill"; fill.style.width = Math.round(data[k] / total * 100) + "%";
+      var fill = document.createElement("div"); fill.className = "fill"; fill.style.width = data[k] + "%";
       track.appendChild(fill);
-      var val = document.createElement("span"); val.className = "val"; val.textContent = Math.round(data[k] / total * 100) + " %";
+      var val = document.createElement("span"); val.className = "val"; val.textContent = data[k] + " %";
       row.appendChild(name); row.appendChild(track); row.appendChild(val);
       el.appendChild(row);
     });
@@ -131,7 +131,12 @@
     document.getElementById("min").textContent = s.min_users || 5;
     bars(document.getElementById("languages"), s.languages, LANG);
     bars(document.getElementById("engines"), s.engines, ENGINE);
-    if (s.updated) document.getElementById("updated").textContent = "Opdateret " + new Date(s.updated).toLocaleString("da-DK", { dateStyle: "long", timeStyle: "short" }) + ".";
+    if (s.updated) {
+      var d = new Date(s.updated);
+      var day = d.toLocaleDateString("da-DK", { day: "numeric", month: "long" });
+      var hm = d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" }).replace(":", ".");
+      document.getElementById("updated").textContent = "Opdateret " + day + " kl. " + hm + ". Tallene opdateres af sig selv.";
+    }
   }
   function fail() {
     document.querySelectorAll("[data-k]").forEach(function (el) { el.textContent = "Ikke tilgængelig"; el.classList.add("pending"); });

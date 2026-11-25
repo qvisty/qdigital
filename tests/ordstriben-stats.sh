@@ -41,22 +41,25 @@ BIG=$(php -r 'echo str_repeat(" ", 70000);')
 check "over 64 KB giver 413" 413 "$(post "$BIG")"
 
 S=$(summ)
-check "under 5 brugere: ord skjules" null "$(js "$S" words)"
-check "under 5 brugere: brugere i alt skjules" null "$(js "$S" users.total)"
+check "under 5 brugere: ord i alt skjules" null "$(js "$S" total.words)"
+check "under 5 brugere: ord pr. bruger skjules" null "$(js "$S" per_user.words)"
 check "under 5 brugere: sprog skjules" null "$(js "$S" languages)"
 
 for n in 2 3 4 5; do post "$(batch $n)" >/dev/null; done
 S=$(summ)
-check "5 brugere: brugere i alt" 5 "$(js "$S" users.total)"
-check "5 brugere: brugere i dag" 5 "$(js "$S" users.today)"
-check "dobbelt kald tæller kun én gang: ord" 1000 "$(js "$S" words)"
-check "dikteringer" 10 "$(js "$S" dictations)"
-check "tastetryk sparet" 6000 "$(js "$S" keystrokes_saved)"
+check "antal brugere gives aldrig ud" null "$(js "$S" users)"
+check "dobbelt kald tæller kun én gang: ord i alt" 1000 "$(js "$S" total.words)"
+check "dikteringer i alt" 10 "$(js "$S" total.dictations)"
+check "tastetryk sparet i alt" 6000 "$(js "$S" total.keystrokes_saved)"
+check "sparet tid i alt afrundes nedad" 10 "$(js "$S" total.minutes_saved)"
+check "ord pr. bruger" 200 "$(js "$S" per_user.words)"
+check "tastetryk pr. bruger" 1200 "$(js "$S" per_user.keystrokes_saved)"
+check "sparet tid pr. bruger" 3 "$(js "$S" per_user.minutes_saved)"
+check "dikteringer pr. bruger" 2 "$(js "$S" per_user.dictations)"
 check "ord pr. minut" 100 "$(js "$S" words_per_minute)"
-check "sparet tid i minutter" 16 "$(js "$S" minutes_saved)"
 check "ventetid" 2000 "$(js "$S" avg_wait_ms)"
 check "andel lydfiler" 0.5 "$(js "$S" file_share)"
-check "sprog" '{"da":5}' "$(js "$S" languages)"
+check "sprog som procent" '{"da":100}' "$(js "$S" languages)"
 check "summary må hentes fra andre sider" 1 "$(curl -s -D - -o /dev/null "$URL?summary" | grep -ci 'access-control-allow-origin: \*')"
 
 check "GET uden nøgle giver 401" 401 "$(curl -s -o /dev/null -w '%{http_code}' "$URL")"
@@ -67,7 +70,7 @@ check "ingen IP adresse gemt" 0 "$(grep -rl '127.0.0.1' "$WORK/data" | wc -l | t
 check "DELETE med ugyldigt id giver 400" 400 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE "$URL?user=abc")"
 check "DELETE giver 204" 204 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE "$URL?user=$(uid 5)")"
 S=$(summ)
-check "efter DELETE er der under 5 igen" null "$(js "$S" users.total)"
+check "efter DELETE er der under 5 igen" null "$(js "$S" total.words)"
 
 check "ny bruger over dagsgrænsen giver 429" 429 "$(post "$(batch 6)" >/dev/null; post "$(batch 7)")"
 check "for mange forkerte nøgler giver 429" 429 "$(for i in 1 2 3; do curl -s -o /dev/null -H 'X-Api-Key: forkert' "$URL"; done; curl -s -o /dev/null -w '%{http_code}' -H 'X-Api-Key: forkert' "$URL")"
