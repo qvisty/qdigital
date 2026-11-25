@@ -2,7 +2,7 @@
   <title id="t">Sådan virker Ordstriben</title>
   <desc id="d">Forenklet animation: en boble dukker op ved et tekstfelt, der trykkes på den, ringen er grøn mens der lyttes, fyldes grønt ved en pause, bliver gul mens teksten skrives, og teksten står ved markøren.</desc>
   <style>
-    /* Én gennemgang tager 11 sekunder og gentages. Uden bevægelse vises slutbilledet. */
+    /* Teksten har fast bredde (textLength), så markøren altid står lige efter den. Én gennemgang tager 11 sekunder og gentages. Uden bevægelse vises slutbilledet. */
     .a { animation-duration: 11s; animation-iteration-count: infinite; animation-timing-function: linear; }
     .bubble { animation-name: bubble; transform-origin: 282px 262px; }
     .tap { animation-name: tap; transform-origin: 282px 262px; }
@@ -24,7 +24,7 @@
     @keyframes pause { 0%,44% { opacity: 0; stroke-dashoffset: 163.4; } 45% { opacity: 1; stroke-dashoffset: 163.4; } 57% { opacity: 1; stroke-dashoffset: 0; } 58%,100% { opacity: 0; stroke-dashoffset: 0; } }
     @keyframes amber { 0%,57% { opacity: 0; stroke-dashoffset: 163.4; } 58% { opacity: 1; stroke-dashoffset: 160; } 72% { opacity: 1; stroke-dashoffset: 0; } 75%,100% { opacity: 0; stroke-dashoffset: 0; } }
     @keyframes type { 0%,74% { transform: scaleX(0); } 84%,94% { transform: scaleX(1); } 98%,100% { transform: scaleX(0); } }
-    @keyframes caret { 0%,74% { transform: translateX(0); } 84%,94% { transform: translateX(206px); } 98%,100% { transform: translateX(0); } }
+    @keyframes caret { 0%,74% { transform: translateX(0); } 84%,94% { transform: translateX(179px); } 98%,100% { transform: translateX(0); } }
     @keyframes lbl1 { 0%,2% { opacity: 0; } 4%,14% { opacity: 1; } 16%,100% { opacity: 0; } }
     @keyframes lbl2 { 0%,15% { opacity: 0; } 17%,43% { opacity: 1; } 45%,100% { opacity: 0; } }
     @keyframes lbl2b { 0%,44% { opacity: 0; } 46%,56% { opacity: 1; } 58%,100% { opacity: 0; } }
@@ -39,7 +39,7 @@
       .bubble { opacity: 1; }
       .tap, .listen, .pause, .amber, .lbl1, .lbl2, .lbl2b, .lbl3, .words { opacity: 0; }
       .type { transform: none; }
-      .caret { transform: translateX(206px); }
+      .caret { transform: translateX(179px); }
       .lbl4 { opacity: 1; }
     }
     text { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
@@ -60,9 +60,9 @@
   <!-- Tekstfeltet med fokus -->
   <rect x="48" y="186" width="264" height="150" rx="10" fill="#FFFFFF" stroke="#8DB4DA" stroke-width="2"/>
   <defs>
-    <clipPath id="typed"><rect class="a type" x="58" y="196" width="236" height="40"/></clipPath>
+    <clipPath id="typed"><rect class="a type" x="58" y="196" width="181" height="40"/></clipPath>
   </defs>
-  <text x="60" y="218" font-size="14" fill="#1E3A5F" clip-path="url(#typed)">Vi ses kl. 14 i morgen. Tak!</text>
+  <text x="60" y="218" font-size="14" fill="#1E3A5F" textLength="176" lengthAdjust="spacingAndGlyphs" clip-path="url(#typed)">Vi ses kl. 14 i morgen. Tak!</text>
   <g class="a caret"><rect class="blink" x="60" y="205" width="2" height="17" fill="#1E3A5F"/></g>
 
   <!-- Tastatur, antydet -->
