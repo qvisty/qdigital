@@ -23,10 +23,10 @@ check() { if [ "$2" = "$3" ]; then echo "ok   $1"; else echo "FEJL $1: ventede $
 post() { curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' --data-binary "$1" "$URL"; }
 NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 uid() { printf '%08x-0000-4000-8000-%012x' "$1" "$1"; }
-ev() { echo "{\"t\":\"$NOW\",\"kind\":\"$1\",\"lang\":\"da\",\"engine\":\"whisper-small-da\",\"ok\":$2,\"error\":null,\"audio_ms\":60000,\"wait_ms\":2000,\"words\":100,\"chars\":600,\"mode\":\"DIRECT\",\"fallback\":false}"; }
+ev() { local extra=""; [ "$1" = dictation ] && extra=",\"fillers\":{\"oeh\":3,\"aeh\":2},\"emoji\":{\"😂\":2}"; echo "{\"t\":\"$NOW\",\"kind\":\"$1\",\"lang\":\"da\",\"engine\":\"whisper-small-da\",\"ok\":$2,\"error\":null,\"audio_ms\":60000,\"wait_ms\":2000,\"words\":100,\"chars\":600,\"mode\":\"DIRECT\",\"fallback\":false$extra}"; }
 batch() { echo "{\"user\":\"$(uid "$1")\",\"version\":\"0.1.9\",\"events\":[$(ev dictation true),$(ev file true)]}"; }
 summ() { sleep 1.2; curl -s "$URL?summary"; }
-js() { php -r '$d=json_decode($argv[1],true); $v=$argv[2]; foreach(explode(".",$v) as $k) $d=$d[$k]??null; echo json_encode($d);' "$1" "$2"; }
+js() { php -r '$d=json_decode($argv[1],true); $v=$argv[2]; foreach(explode(".",$v) as $k) $d=$d[$k]??null; echo json_encode($d, JSON_UNESCAPED_UNICODE);' "$1" "$2"; }
 
 check "gyldigt kald giver 204" 204 "$(post "$(batch 1)")"
 check "samme kald igen giver 204" 204 "$(post "$(batch 1)")"
@@ -34,6 +34,8 @@ check "forkert content type giver 415" 415 "$(curl -s -o /dev/null -w '%{http_co
 check "ugyldig json giver 400" 400 "$(post '{nej')"
 check "ekstra felt i hændelse giver 400" 400 "$(post "{\"user\":\"$(uid 1)\",\"version\":\"0.1.9\",\"events\":[{\"t\":\"$NOW\",\"kind\":\"dictation\",\"lang\":\"da\",\"engine\":\"x\",\"ok\":true,\"error\":null,\"audio_ms\":1,\"wait_ms\":1,\"words\":1,\"chars\":1,\"mode\":\"DIRECT\",\"fallback\":false,\"tekst\":\"hej\"}]}")"
 check "app navn giver 400" 400 "$(post "{\"user\":\"$(uid 1)\",\"version\":\"0.1.9\",\"app\":\"com.example\",\"events\":[$(ev dictation true)]}")"
+check "ukendt fyldord giver 400" 400 "$(post "{\"user\":\"$(uid 1)\",\"version\":\"0.1.9\",\"events\":[$(ev file true | sed 's/}$/,\"fillers\":{\"bla\":1}}/')]}")"
+check "tekst som smiley giver 400" 400 "$(post "{\"user\":\"$(uid 1)\",\"version\":\"0.1.9\",\"events\":[$(ev file true | sed 's/}$/,\"emoji\":{\"hej\":1}}/')]}")"
 check "count over 10000 giver 400" 400 "$(post "{\"user\":\"$(uid 1)\",\"version\":\"0.1.9\",\"events\":[$(ev dictation true | sed 's/}$/,\"count\":10001}/')]}")"
 check "ukendt kind giver 400" 400 "$(post "{\"user\":\"$(uid 1)\",\"version\":\"0.1.9\",\"events\":[$(ev video true)]}")"
 check "ikke uuid giver 400" 400 "$(post '{"user":"abc","version":"0.1.9","events":[]}')"
@@ -72,6 +74,15 @@ S=$(summ)
 check "historik med ventetid 0 ændrer ikke ventetiden" 2000 "$(js "$S" avg_wait_ms)"
 check "historik tæller med i ord i alt" 1100 "$(js "$S" total.words)"
 check "historik med count 40 giver 50 dikteringer i alt" 50 "$(js "$S" total.dictations)"
+UNI="{\"user\":\"$(uid 1)\",\"version\":\"0.1.9\",\"events\":[$(ev file true | sed 's/}$/,\"emoji\":{\"🦄\":9},\"audio_ms\":1}/; s/\"audio_ms\":60000,//')]}"
+check "smiley fra én bruger modtages" 204 "$(post "$UNI")"
+S=$(summ)
+check "øh fjernet i alt" 20 "$(js "$S" fun.fillers_total)"
+check "øh fordelt" '{"oeh":10,"aeh":10}' "$(js "$S" fun.fillers)"
+check "top smiley kun med 5 brugere bag" '[{"emoji":"😂","count":10}]' "$(js "$S" fun.top_emoji)"
+check "længste diktering i sekunder" 60 "$(js "$S" fun.longest_seconds)"
+check "travleste ugedag" "$(TZ=Europe/Copenhagen date +%u)" "$(js "$S" fun.busiest_weekday)"
+check "travleste time" "$(TZ=Europe/Copenhagen date +%-H)" "$(js "$S" fun.busiest_hour)"
 check "summary må hentes fra andre sider" 1 "$(curl -s -D - -o /dev/null "$URL?summary" | grep -ci 'access-control-allow-origin: \*')"
 
 check "GET uden nøgle giver 401" 401 "$(curl -s -o /dev/null -w '%{http_code}' "$URL")"

@@ -29,7 +29,11 @@ const UUID_RE = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const VERSION_RE = '/^[0-9][0-9A-Za-z.+-]{0,31}$/';
 const EVENT_KEYS = ['t', 'kind', 'lang', 'engine', 'ok', 'error', 'audio_ms', 'wait_ms', 'words', 'chars', 'mode', 'fallback'];
 /** Valgfrit felt: hvor mange dikteringer én linje dækker, fx en samlet linje pr. dag fra historikken. Standard 1. */
-const OPTIONAL_KEYS = ['count'];
+const OPTIONAL_KEYS = ['count', 'fillers', 'emoji'];
+/** Fyldord, som appen har fjernet. Kun antal pr. slags. */
+const FILLER_KEYS = ['oeh', 'aeh', 'oehm', 'hmm', 'andre'];
+/** Højst så mange forskellige smileys i én hændelse. */
+const MAX_EMOJI_KEYS = 20;
 
 function reply(int $code, ?array $body = null, int $cache = 0): never {
     http_response_code($code);
@@ -117,11 +121,33 @@ function int_in(mixed $v, int $min, int $max): bool {
     return is_int($v) && $v >= $min && $v <= $max;
 }
 
+/** Et objekt med kendte nøgler og antal fra 0 til 100000, eller null. Tomt objekt er tilladt. */
+function valid_counts(mixed $o, array $keys): ?array {
+    if (!is_array($o) || (array_is_list($o) && $o !== [])) return null;
+    foreach ($o as $k => $n) if (!in_array((string) $k, $keys, true) || !int_in($n, 0, 100000)) return null;
+    return $o;
+}
+
+/** Smileys som nøgler, kun billedtegn, højst 16 byte hver, med antal fra 1 til 100000. */
+function valid_emoji(mixed $o): ?array {
+    if (!is_array($o) || (array_is_list($o) && $o !== []) || count($o) > MAX_EMOJI_KEYS) return null;
+    foreach ($o as $k => $n) {
+        $k = (string) $k;
+        if ($k === '' || strlen($k) > 16 || !mb_check_encoding($k, 'UTF-8')) return null;
+        if (preg_match('/^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[\x{FE0F}\x{200D}\x{1F3FB}-\x{1F3FF}\x{20E3}#*0-9])+$/u', $k) !== 1) return null;
+        if (preg_match('/\p{Extended_Pictographic}|\p{Regional_Indicator}/u', $k) !== 1) return null;
+        if (!int_in($n, 1, 100000)) return null;
+    }
+    return $o;
+}
+
 /** Én hændelse præcis efter kontrakten, eller null. */
 function valid_event(mixed $e): ?array {
     if (!is_array($e) || array_is_list($e)) return null;
     foreach (array_keys($e) as $k) if (!in_array($k, EVENT_KEYS, true) && !in_array($k, OPTIONAL_KEYS, true)) return null;
     if (array_key_exists('count', $e) && !int_in($e['count'], 1, 10000)) return null;
+    if (array_key_exists('fillers', $e) && valid_counts($e['fillers'], FILLER_KEYS) === null) return null;
+    if (array_key_exists('emoji', $e) && valid_emoji($e['emoji']) === null) return null;
     $t = $e['t'] ?? null;
     if (!is_string($t) || preg_match('/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/', $t) !== 1) return null;
     $ts = strtotime($t);
@@ -138,6 +164,8 @@ function valid_event(mixed $e): ?array {
     $out = [];
     foreach (EVENT_KEYS as $k) $out[$k] = $e[$k];
     if (array_key_exists('count', $e) && $e['count'] !== 1) $out['count'] = $e['count'];
+    if (!empty($e['fillers'])) $out['fillers'] = $e['fillers'];
+    if (!empty($e['emoji'])) $out['emoji'] = $e['emoji'];
     return $out;
 }
 
@@ -190,6 +218,33 @@ function sweep(string $dir): void {
     foreach (glob($dir . '/*.tmp') ?: [] as $f) if (filemtime($f) < time() - 3600) @unlink($f);
 }
 
+/**
+ * De sjove tal. Smileys vises kun, hvis mindst MIN_USERS brugere har brugt dem, og højst fem.
+ * Ugedag og time er dem med flest enkelte dikteringer.
+ */
+function fun_numbers(bool $enough, array $fillers, array $emojiN, array $emojiUsers, int $longest, array $weekday, array $hour): ?array {
+    if (!$enough) return null;
+    $top = [];
+    arsort($emojiN);
+    foreach ($emojiN as $k => $n) {
+        if (($emojiUsers[$k] ?? 0) < MIN_USERS) continue;
+        $top[] = ['emoji' => (string) $k, 'count' => rough($n)];
+        if (count($top) === 5) break;
+    }
+    $f = [];
+    foreach (FILLER_KEYS as $k) if (!empty($fillers[$k])) $f[$k] = rough($fillers[$k]);
+    arsort($weekday);
+    arsort($hour);
+    return [
+        'fillers_total' => rough(array_sum($fillers)),
+        'fillers' => $f,
+        'top_emoji' => $top,
+        'longest_seconds' => $longest > 0 ? (int) round($longest / 1000) : null,
+        'busiest_weekday' => $weekday ? (int) array_key_first($weekday) : null,
+        'busiest_hour' => $hour ? (int) array_key_first($hour) : null,
+    ];
+}
+
 /** Andel med to decimaler, eller null. */
 function ratio(float $a, float $b): ?float {
     return $b > 0 ? round($a / $b, 4) : null;
@@ -213,11 +268,13 @@ function summary(string $dir): array {
     $users = 0; $usersWithOk = 0;
     $events = 0; $ok = 0; $dict = 0; $files = 0; $fileChars = 0; $fileAudio = 0; $words = 0; $chars = 0; $audio = 0; $wait = 0; $waitN = 0;
     $lang = []; $engine = [];
+    $fillers = []; $emojiN = []; $emojiUsers = []; $longest = 0; $weekday = []; $hour = [];
+    $tz = new DateTimeZone('Europe/Copenhagen');
     foreach (glob($dir . '/u_*.json') ?: [] as $f) {
         $d = json_decode((string) file_get_contents($f), true);
         if (!is_array($d) || empty($d['events'])) continue;
         $users++;
-        $hadOk = false; $ul = []; $ue = [];
+        $hadOk = false; $ul = []; $ue = []; $uEmoji = [];
         foreach ($d['events'] as $e) {
             $events++;
             if ($e['kind'] === 'file') $files++;
@@ -230,9 +287,20 @@ function summary(string $dir): array {
                 $words += $e['words']; $chars += $e['chars']; $audio += $e['audio_ms'];
                 // Historik fra før samtykket har ventetid 0 og tæller ikke med i ventetiden
                 if ($e['wait_ms'] > 0) { $wait += $e['wait_ms']; $waitN++; }
+                foreach ($e['fillers'] ?? [] as $k => $n) $fillers[$k] = ($fillers[$k] ?? 0) + $n;
+                foreach ($e['emoji'] ?? [] as $k => $n) { $k = (string) $k; $emojiN[$k] = ($emojiN[$k] ?? 0) + $n; $uEmoji[$k] = true; }
+                // Enkelte dikteringer, ikke historik: længste diktering og hvornår der dikteres
+                if (!isset($e['count']) && $e['wait_ms'] > 0) {
+                    $longest = max($longest, $e['audio_ms']);
+                    $dt = (new DateTime('@' . strtotime((string) $e['t'])))->setTimezone($tz);
+                    $wd = (int) $dt->format('N'); $hr = (int) $dt->format('G');
+                    $weekday[$wd] = ($weekday[$wd] ?? 0) + 1;
+                    $hour[$hr] = ($hour[$hr] ?? 0) + 1;
+                }
             }
         }
         if ($hadOk) $usersWithOk++;
+        foreach (array_keys($uEmoji) as $k) $emojiUsers[$k] = ($emojiUsers[$k] ?? 0) + 1;
         foreach (array_keys($ul) as $k) $lang[$k] = ($lang[$k] ?? 0) + 1;
         foreach (array_keys($ue) as $k) $engine[$k] = ($engine[$k] ?? 0) + 1;
     }
@@ -275,6 +343,7 @@ function summary(string $dir): array {
         'avg_wait_ms' => $enough && $waitN > 0 ? (int) round($wait / $waitN) : null,
         'success_rate' => $enough ? ratio($ok, $events) : null,
         'file_share' => $enough ? ratio($files, $events) : null,
+        'fun' => fun_numbers($enough, $fillers, $emojiN, $emojiUsers, $longest, $weekday, $hour),
         'languages' => $dist($lang),
         'engines' => $dist($engine),
     ];
