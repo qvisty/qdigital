@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ordstriben i tal</title>
+<meta name="description" content="Hvor meget Ordstriben bliver brugt: ord, sparede tastetryk og sparet tid. Kun samlede tal fra brugere, der selv har sagt ja.">
+<meta name="theme-color" content="#DCEEFB">
+<link rel="canonical" href="https://qdigital.dk/ordstriben/tal/">
+<meta property="og:title" content="Ordstriben i tal">
+<meta property="og:description" content="Ord, sparede tastetryk og sparet tid med Ordstriben.">
+<meta property="og:image" content="https://qdigital.dk/ordstriben/img/play-grafik-1024x500.png">
+<link rel="icon" href="../img/ikon-A.svg" type="image/svg+xml">
+<style>
+  :root { color-scheme: light dark; --bg:#F7FBFE; --fg:#1E3A5F; --muted:#3F6488; --card:#FFFFFF; --line:#D2E8F9; --accent:#5FA8E0; --soft:#DCEEFB; --bar:#9CCBEF; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#10233A; --fg:#EAF5FD; --muted:#B9DCF5; --card:#16304F; --line:#2A4A70; --soft:#16304F; --bar:#3E78A8; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color:inherit; }
+  .wrap { max-width:960px; margin:0 auto; padding:0 16px; }
+  .top { display:flex; justify-content:space-between; align-items:center; padding:18px 0; font-size:15px; }
+  .top a { text-decoration:none; color:var(--muted); }
+  .top b { color:var(--fg); }
+  .hero { background:linear-gradient(180deg, var(--soft), var(--bg)); padding-bottom:24px; }
+  h1 { font-size:36px; line-height:1.15; margin:8px 0 8px; text-wrap:balance; }
+  .lead { font-size:19px; color:var(--muted); margin:0; max-width:40rem; }
+  .big { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-top:28px; }
+  .tile { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px 20px; min-width:0; }
+  .tile .num { font-size:clamp(28px, 6vw, 40px); font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums; }
+  .tile .lbl { color:var(--muted); font-size:15px; margin-top:4px; }
+  .tile.hero-tile .num { color:var(--accent); }
+  h2 { font-size:22px; margin:40px 0 14px; }
+  .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+  .pending { color:var(--muted); font-size:15px !important; font-weight:500 !important; }
+  .bars { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
+  .bar { display:grid; grid-template-columns:minmax(0, 9rem) 1fr auto; gap:12px; align-items:center; font-size:15px; }
+  .bar .track { background:var(--soft); border-radius:999px; height:12px; overflow:hidden; }
+  .bar .fill { background:var(--bar); height:100%; border-radius:999px; }
+  .bar .val { font-variant-numeric:tabular-nums; color:var(--muted); }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .note { color:var(--muted); font-size:14px; margin-top:28px; max-width:44rem; }
+  .foot { margin-top:48px; border-top:1px solid var(--line); padding:22px 0 40px; font-size:14px; color:var(--muted); }
+  .foot .wrap { display:flex; flex-wrap:wrap; gap:8px 24px; justify-content:space-between; }
+  @media (max-width: 760px) {
+    h1 { font-size:30px; }
+    .big, .grid { grid-template-columns:1fr 1fr; }
+    .two { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="top"><a href="../"><b>Ordstriben</b></a><a href="/"><b>Q</b> Digital</a></div>
+    <h1>Ordstriben i tal</h1>
+    <p class="lead">Så meget bliver der talt i stedet for tastet. Tallene kommer kun fra brugere, der selv har sagt ja, og de er altid samlet for mange brugere.</p>
+    <div class="big">
+      <div class="tile hero-tile"><div class="num" data-k="words">…</div><div class="lbl">ord dikteret</div></div>
+      <div class="tile hero-tile"><div class="num" data-k="keystrokes_saved">…</div><div class="lbl">tastetryk sparet</div></div>
+      <div class="tile hero-tile"><div class="num" data-k="minutes_saved">…</div><div class="lbl">sparet tid</div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h2>Brugere</h2>
+  <div class="grid">
+    <div class="tile"><div class="num" data-k="users.today">…</div><div class="lbl">i dag</div></div>
+    <div class="tile"><div class="num" data-k="users.week">…</div><div class="lbl">de seneste 7 dage</div></div>
+    <div class="tile"><div class="num" data-k="users.total">…</div><div class="lbl">i alt</div></div>
+  </div>
+
+  <h2>Diktering</h2>
+  <div class="grid">
+    <div class="tile"><div class="num" data-k="dictations">…</div><div class="lbl">dikteringer</div></div>
+    <div class="tile"><div class="num" data-k="words_per_user">…</div><div class="lbl">ord pr. bruger i gennemsnit</div></div>
+    <div class="tile"><div class="num" data-k="words_per_minute">…</div><div class="lbl">ord pr. minut, når der tales</div></div>
+    <div class="tile"><div class="num" data-k="avg_wait_ms">…</div><div class="lbl">ventetid på teksten i gennemsnit</div></div>
+    <div class="tile"><div class="num" data-k="success_rate">…</div><div class="lbl">lykkes</div></div>
+    <div class="tile"><div class="num" data-k="file_share">…</div><div class="lbl">fra lydfiler</div></div>
+  </div>
+
+  <div class="two">
+    <div><h2>Sprog</h2><div class="bars" id="languages"><span class="pending">Henter</span></div></div>
+    <div><h2>Talemodel</h2><div class="bars" id="engines"><span class="pending">Henter</span></div></div>
+  </div>
+
+  <p class="note">Sparet tid regnes som tiden, det ville tage at skrive ordene på 38 ord i minuttet, minus den tid, der blev talt. Et tal vises først, når mindst <span id="min">5</span> brugere står bag. Appen sender aldrig tekst, lyd eller navne på apps. Læs mere i <a href="../privatliv/">privatlivspolitikken</a>. <span id="updated"></span></p>
+</main>
+
+<footer class="foot"><div class="wrap"><span>Ordstriben er lavet af <a href="/"><b>Q</b> Digital</a></span><span>CVR 46418840. Aabenraa, Danmark.</span></div></footer>
+
+<script>
+(function () {
+  var nf = new Intl.NumberFormat("da-DK");
+  var LANG = { da: "Dansk", en: "Engelsk", sv: "Svensk", nb: "Norsk", de: "Tysk", andre: "Andre" };
+  var ENGINE = { "whisper-small-da": "Dansk Whisper small", "whisper-turbo-da": "Dansk Whisper turbo", system: "Telefonens egen", andre: "Andre" };
+  function get(o, path) { return path.split(".").reduce(function (a, k) { return a == null ? a : a[k]; }, o); }
+  function fmt(k, v) {
+    if (v === null || v === undefined) return null;
+    if (k === "minutes_saved") return v >= 120 ? nf.format(Math.round(v / 60)) + " timer" : nf.format(v) + " min";
+    if (k === "avg_wait_ms") return (v / 1000).toLocaleString("da-DK", { maximumFractionDigits: 1 }) + " sek";
+    if (k === "success_rate" || k === "file_share") return Math.round(v * 100) + " %";
+    if (k === "words_per_minute") return v.toLocaleString("da-DK", { maximumFractionDigits: 0 });
+    return nf.format(v);
+  }
+  function bars(el, data, names) {
+    el.textContent = "";
+    if (!data || !Object.keys(data).length) {
+      var p = document.createElement("span"); p.className = "pending"; p.textContent = "Kommer, når der er brugere nok"; el.appendChild(p); return;
+    }
+    var total = Object.keys(data).reduce(function (s, k) { return s + data[k]; }, 0);
+    Object.keys(data).forEach(function (k) {
+      var row = document.createElement("div"); row.className = "bar";
+      var name = document.createElement("span"); name.textContent = names[k] || k;
+      var track = document.createElement("div"); track.className = "track";
+      var fill = document.createElement("div"); fill.className = "fill"; fill.style.width = Math.round(data[k] / total * 100) + "%";
+      track.appendChild(fill);
+      var val = document.createElement("span"); val.className = "val"; val.textContent = Math.round(data[k] / total * 100) + " %";
+      row.appendChild(name); row.appendChild(track); row.appendChild(val);
+      el.appendChild(row);
+    });
+  }
+  function render(s) {
+    document.querySelectorAll("[data-k]").forEach(function (el) {
+      var k = el.getAttribute("data-k");
+      var v = fmt(k.split(".").pop(), get(s, k));
+      if (v === null) { el.textContent = "Under " + (s.min_users || 5) + " brugere"; el.classList.add("pending"); }
+      else { el.textContent = v; el.classList.remove("pending"); }
+    });
+    document.getElementById("min").textContent = s.min_users || 5;
+    bars(document.getElementById("languages"), s.languages, LANG);
+    bars(document.getElementById("engines"), s.engines, ENGINE);
+    if (s.updated) document.getElementById("updated").textContent = "Opdateret " + new Date(s.updated).toLocaleString("da-DK", { dateStyle: "long", timeStyle: "short" }) + ".";
+  }
+  function fail() {
+    document.querySelectorAll("[data-k]").forEach(function (el) { el.textContent = "Ikke tilgængelig"; el.classList.add("pending"); });
+    ["languages", "engines"].forEach(function (id) { document.getElementById(id).textContent = "Ikke tilgængelig lige nu"; });
+  }
+  if (window.ORDSTRIBEN_SAMPLE) { render(window.ORDSTRIBEN_SAMPLE); return; }
+  fetch("../stats/?summary", { headers: { Accept: "application/json" } })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(render, fail);
+})();
+</script>
+</body>
+</html>
