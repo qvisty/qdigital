@@ -102,8 +102,8 @@ jobs:
         run: |
           # ordstriben/log/index.php gemmer i ordstriben-data/log uden for public_html og læser config.php derfra.
           # api_hash er sha256 af læsenøglen til GET. Uden hemmeligheden svarer GET altid 401.
-          mkdir -p "$RUNNER_TEMP/ordstriben-data/log"
-          touch "$RUNNER_TEMP/ordstriben-data/log/.keep"
+          mkdir -p "$RUNNER_TEMP/ordstriben-data/log" "$RUNNER_TEMP/ordstriben-data/stats"
+          touch "$RUNNER_TEMP/ordstriben-data/log/.keep" "$RUNNER_TEMP/ordstriben-data/stats/.keep"
           php -r '
             $api = strtolower(trim((string) getenv("ORDSTRIBEN_LOG_API_HASH")));
             if ($api !== "") file_put_contents(getenv("RUNNER_TEMP") . "/ordstriben-data/config.php", "<?php return " . var_export(["api_hash" => $api], true) . ";\n");
