@@ -31,7 +31,7 @@
   .tile.hero-tile .num { color:var(--accent); }
   h2 { font-size:22px; margin:40px 0 14px; }
   .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
-  .grid.four { grid-template-columns:repeat(4, 1fr); }
+  .grid.four { grid-template-columns:repeat(auto-fit, minmax(10rem, 1fr)); }
   .pending { color:var(--muted); font-size:15px !important; font-weight:500 !important; }
   .bars { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
   .bar { display:grid; grid-template-columns:minmax(0, 9rem) 1fr auto; gap:12px; align-items:center; font-size:15px; }
@@ -69,16 +69,20 @@
     <div class="tile"><div class="num" data-k="per_user.words">…</div><div class="lbl">ord dikteret</div></div>
     <div class="tile"><div class="num" data-k="per_user.keystrokes_saved">…</div><div class="lbl">tastetryk sparet</div></div>
     <div class="tile"><div class="num" data-k="per_user.minutes_saved">…</div><div class="lbl">tid sparet</div></div>
-    <div class="tile"><div class="num" data-k="per_user.dictations">…</div><div class="lbl">dikteringer</div></div>
+    <div class="tile"><div class="num" data-k="per_user.dictations">…</div><div class="lbl">gange dikteret</div></div>
+    <div class="tile"><div class="num" data-k="per_user.minutes_spoken">…</div><div class="lbl">minutter talt</div></div>
   </div>
 
   <h2>Diktering</h2>
-  <div class="grid">
-    <div class="tile"><div class="num" data-k="total.dictations">…</div><div class="lbl">dikteringer i alt</div></div>
+  <div class="grid four">
+    <div class="tile"><div class="num" data-k="total.dictations">…</div><div class="lbl">gange dikteret i alt</div></div>
+    <div class="tile"><div class="num" data-k="total.minutes_spoken">…</div><div class="lbl">minutter talt og skrevet ud i alt</div></div>
     <div class="tile"><div class="num" data-k="words_per_minute">…</div><div class="lbl">ord pr. minut, når der tales</div></div>
     <div class="tile"><div class="num" data-k="avg_wait_ms">…</div><div class="lbl">ventetid på teksten i gennemsnit</div></div>
     <div class="tile"><div class="num" data-k="success_rate">…</div><div class="lbl">lykkes</div></div>
-    <div class="tile"><div class="num" data-k="file_share">…</div><div class="lbl">fra lydfiler</div></div>
+    <div class="tile"><div class="num" data-k="file_share">…</div><div class="lbl">af dikteringerne er lydfiler</div></div>
+    <div class="tile"><div class="num" data-k="total.file_chars">…</div><div class="lbl">tegn skrevet ud fra lydfiler i alt</div></div>
+    <div class="tile"><div class="num" data-k="total.file_minutes">…</div><div class="lbl">minutter lyd fra filer i alt</div></div>
   </div>
 
   <div class="two">
@@ -99,6 +103,8 @@
   function get(o, path) { return path.split(".").reduce(function (a, k) { return a == null ? a : a[k]; }, o); }
   function fmt(k, v) {
     if (v === null || v === undefined) return null;
+    if (k === "file_minutes") return v >= 120 ? nf.format(Math.floor(v / 60)) + " timer" : nf.format(v) + " min";
+    if (k === "minutes_spoken") return v >= 120 ? nf.format(Math.floor(v / 60)) + " timer" : nf.format(v) + " min";
     if (k === "minutes_saved") return v >= 120 ? nf.format(Math.floor(v / 60)) + " timer" : nf.format(v) + " min";
     if (k === "avg_wait_ms") return (v / 1000).toLocaleString("da-DK", { maximumFractionDigits: 1 }) + " sek";
     if (k === "success_rate" || k === "file_share") return Math.round(v * 100) + " %";
