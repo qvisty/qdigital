@@ -39,6 +39,12 @@
   .bar .fill { background:var(--bar); height:100%; border-radius:999px; }
   .bar .val { font-variant-numeric:tabular-nums; color:var(--muted); }
   .two { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .emoji-box { margin-top:16px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 20px; }
+  .emoji-box h3 { margin:0 0 10px; font-size:17px; }
+  .emoji { list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:12px 22px; }
+  .emoji li { display:flex; align-items:baseline; gap:8px; font-variant-numeric:tabular-nums; color:var(--muted); }
+  .emoji li .e { font-size:34px; line-height:1; }
+  .emoji li .pos { font-weight:700; color:var(--fg); }
   .note { color:var(--muted); font-size:14px; margin-top:28px; max-width:44rem; }
   .foot { margin-top:48px; border-top:1px solid var(--line); padding:22px 0 40px; font-size:14px; color:var(--muted); }
   .foot .wrap { display:flex; flex-wrap:wrap; gap:8px 24px; justify-content:space-between; }
@@ -85,12 +91,25 @@
     <div class="tile"><div class="num" data-k="total.file_minutes">…</div><div class="lbl">minutter lyd fra filer i alt</div></div>
   </div>
 
+  <h2>Sjove tal</h2>
+  <div class="grid four" id="fun">
+    <div class="tile"><div class="num" id="f-fillers">…</div><div class="lbl" id="f-fillers-lbl">øh og æh fjernet</div></div>
+    <div class="tile"><div class="num" id="f-novels">…</div><div class="lbl" id="f-novels-lbl">romaner dikteret</div></div>
+    <div class="tile"><div class="num" id="f-coffee">…</div><div class="lbl">kaffepauser sparet, hvis en pause er 10 minutter</div></div>
+    <div class="tile"><div class="num" id="f-longest">…</div><div class="lbl">længste diktering i ét stræk</div></div>
+    <div class="tile"><div class="num" id="f-busy">…</div><div class="lbl">dikteres der mest</div></div>
+  </div>
+  <div class="emoji-box">
+    <h3>Mest dikterede smileys</h3>
+    <ol class="emoji" id="f-emoji"><li class="pending">Henter</li></ol>
+  </div>
+
   <div class="two">
     <div><h2>Sprog</h2><div class="bars" id="languages"><span class="pending">Henter</span></div></div>
     <div><h2>Talemodel</h2><div class="bars" id="engines"><span class="pending">Henter</span></div></div>
   </div>
 
-  <p class="note">Sparet tid regnes som tiden, det ville tage at skrive ordene på 38 ord i minuttet, minus den tid, der blev talt. Tal i alt og pr. bruger er rundet ned til to betydende cifre. Et tal vises først, når mindst <span id="min">5</span> brugere står bag. Appen sender aldrig tekst, lyd eller navne på apps. Læs mere i <a href="../privatliv/">privatlivspolitikken</a>. <span id="updated"></span></p>
+  <p class="note">En roman regnes som 80.000 ord, en side som 250 ord og en tøven som 0,7 sekunder. Sparet tid regnes som tiden, det ville tage at skrive ordene på 38 ord i minuttet, minus den tid, der blev talt. Tal i alt og pr. bruger er rundet ned til to betydende cifre. Et tal vises først, når mindst <span id="min">5</span> brugere står bag. Appen sender aldrig tekst, lyd eller navne på apps. Læs mere i <a href="../privatliv/">privatlivspolitikken</a>. <span id="updated"></span></p>
 </main>
 
 <footer class="foot"><div class="wrap"><span>Ordstriben er lavet af <a href="/"><b>Q</b> Digital</a></span><span>CVR 46418840. Aabenraa, Danmark.</span></div></footer>
@@ -135,6 +154,7 @@
       else { el.textContent = v; el.classList.remove("pending"); }
     });
     document.getElementById("min").textContent = s.min_users || 5;
+    renderFun(s);
     bars(document.getElementById("languages"), s.languages, LANG);
     bars(document.getElementById("engines"), s.engines, ENGINE);
     if (s.updated) {
@@ -143,6 +163,39 @@
       var hm = d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" }).replace(":", ".");
       document.getElementById("updated").textContent = "Opdateret " + day + " kl. " + hm + ". Tallene opdateres af sig selv.";
     }
+  }
+  var DAYS = ["", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag", "Søndag"];
+  function setNum(id, text) {
+    var el = document.getElementById(id);
+    if (text === null) { el.textContent = "Under " + (window.__min || 5) + " brugere"; el.classList.add("pending"); }
+    else { el.textContent = text; el.classList.remove("pending"); }
+  }
+  function renderFun(s) {
+    var f = s.fun || null;
+    window.__min = s.min_users || 5;
+    var words = get(s, "total.words"), saved = get(s, "total.minutes_saved");
+    setNum("f-fillers", f && f.fillers_total != null ? nf.format(f.fillers_total) : null);
+    if (f && f.fillers_total) {
+      var sec = Math.round(f.fillers_total * 0.7 / 60);
+      document.getElementById("f-fillers-lbl").textContent = "øh og æh fjernet. Det er cirka " + nf.format(sec) + " minutters tøven, ingen skal læse";
+    }
+    if (words == null) setNum("f-novels", null);
+    else if (words >= 8000) setNum("f-novels", (words / 80000).toLocaleString("da-DK", { maximumFractionDigits: 1 }));
+    else { setNum("f-novels", nf.format(Math.floor(words / 250))); document.getElementById("f-novels-lbl").textContent = "romansider dikteret"; }
+    setNum("f-coffee", saved == null ? null : nf.format(Math.floor(saved / 10)));
+    setNum("f-longest", f && f.longest_seconds != null ? Math.floor(f.longest_seconds / 60) + ":" + String(f.longest_seconds % 60).padStart(2, "0") + " min" : null);
+    setNum("f-busy", f && f.busiest_weekday != null && f.busiest_hour != null ? DAYS[f.busiest_weekday] + " kl. " + f.busiest_hour : null);
+    var ol = document.getElementById("f-emoji");
+    ol.textContent = "";
+    var top = f && Array.isArray(f.top_emoji) ? f.top_emoji : [];
+    if (!top.length) { var li = document.createElement("li"); li.className = "pending"; li.textContent = "Kommer, når mindst " + window.__min + " brugere har dikteret den samme smiley"; ol.appendChild(li); return; }
+    top.forEach(function (t, i) {
+      var li = document.createElement("li");
+      var pos = document.createElement("span"); pos.className = "pos"; pos.textContent = (i + 1) + ".";
+      var e = document.createElement("span"); e.className = "e"; e.textContent = t.emoji;
+      var n = document.createElement("span"); n.textContent = nf.format(t.count) + " gange";
+      li.appendChild(pos); li.appendChild(e); li.appendChild(n); ol.appendChild(li);
+    });
   }
   function fail() {
     document.querySelectorAll("[data-k]").forEach(function (el) { el.textContent = "Ikke tilgængelig"; el.classList.add("pending"); });
