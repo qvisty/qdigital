@@ -45,14 +45,13 @@
   .bubble svg.ring { position:absolute; inset:-4px; width:64px; height:64px; transform:rotate(-90deg); }
   .demo-caption { margin:12px 0 0; font-size:14px; color:var(--muted); }
   h2 { font-size:26px; margin:48px 0 16px; }
-  .steps { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+  .how { display:grid; grid-template-columns:360px 1fr; gap:32px; align-items:center; }
+  .anim { display:block; width:100%; max-width:360px; height:auto; margin:0 auto; }
+  .steps { display:grid; grid-template-columns:1fr; gap:16px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px 20px; }
   .card h3 { margin:0 0 6px; font-size:18px; }
   .card p { margin:0; color:var(--muted); font-size:16px; }
   .num { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--soft); color:var(--fg); font-weight:700; margin-bottom:8px; }
-  .rings { display:flex; flex-wrap:wrap; gap:14px; margin-top:16px; }
-  .rings span { display:inline-flex; align-items:center; gap:8px; font-size:15px; color:var(--muted); }
-  .rings b { width:16px; height:16px; border-radius:50%; border:3px solid; display:inline-block; }
   .features { display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; }
   .privacy { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:6px 22px 14px; }
   .privacy ul { padding-left:20px; margin:8px 0; }
@@ -65,7 +64,8 @@
     h1 { font-size:32px; }
     .lead { font-size:18px; }
     .hero-grid { grid-template-columns:1fr; }
-    .steps, .features { grid-template-columns:1fr; }
+    .how, .features { grid-template-columns:1fr; }
+    .anim { max-width:300px; }
   }
   @media (prefers-reduced-motion: reduce) { .cursor { animation:none; } }
 </style>
@@ -103,14 +103,13 @@
 
 <main class="wrap">
   <h2>Sådan virker det</h2>
-  <div class="steps">
-    <div class="card"><span class="num">1</span><h3>Tryk på boblen</h3><p>En lille boble dukker op ved det felt, du skriver i, fx i Gmail, Beskeder eller Chrome.</p></div>
-    <div class="card"><span class="num">2</span><h3>Tal dansk</h3><p>Ringen om boblen er grøn, mens Ordstriben lytter. Ved en pause fyldes den grønt og stopper af sig selv.</p></div>
-    <div class="card"><span class="num">3</span><h3>Teksten kommer</h3><p>Ringen bliver gul, mens teksten skrives. Når ringen er fuld, står teksten ved markøren.</p></div>
-  </div>
-  <div class="rings" aria-hidden="true">
-    <span><b style="border-color:var(--green)"></b>Lytter</span>
-    <span><b style="border-color:var(--yellow)"></b>Skriver teksten</span>
+  <div class="how">
+    <img class="anim" src="img/saadan-virker-det.svg" width="360" height="560" alt="Animation: tryk på boblen, tal dansk, ringen bliver grøn og derefter gul, og teksten står ved markøren">
+    <div class="steps">
+      <div class="card"><span class="num">1</span><h3>Tryk på boblen</h3><p>En lille boble dukker op ved det felt, du skriver i, fx i Gmail, Beskeder eller Chrome.</p></div>
+      <div class="card"><span class="num">2</span><h3>Tal dansk</h3><p>Ringen om boblen er grøn, mens Ordstriben lytter. Ved en pause fyldes den grønt og stopper af sig selv.</p></div>
+      <div class="card"><span class="num">3</span><h3>Teksten kommer</h3><p>Ringen bliver gul, mens teksten skrives. Når ringen er fuld, står teksten ved markøren.</p></div>
+    </div>
   </div>
 
   <h2>Det får du</h2>
