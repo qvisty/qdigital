@@ -68,4 +68,4 @@ Noteret 25. november 2026. Ret disse ting, når produktet er færdigt og udgives
 
 ## Trin for trin
 
-Kortbunken til vejledninger trin for trin ligger på https://claude.ai/artifact/Vv4xmeeLDoqvnjLh5jk8BT. Kilde og vejledning til andre sessioner står i `design/trin-for-trin/README.md`. Jesper vil gerne have vejledninger i den form.
+Trinkort, kortbunken til vejledninger trin for trin, ligger på https://claude.ai/artifact/Vv4xmeeLDoqvnjLh5jk8BT. Kilde og vejledning til andre sessioner står i `design/trin-for-trin/README.md`. Jesper vil gerne have vejledninger i den form.
