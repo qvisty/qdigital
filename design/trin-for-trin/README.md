@@ -13,6 +13,7 @@ Kendte trinkort:
 | Session | Adresse |
 |---|---|
 | qdigital.dk hjemmeside, udgiver til Simply | https://claude.ai/artifact/Vv4xmeeLDoqvnjLh5jk8BT |
+| TS Projekt kvalificering og udvikling (Truckspotting) | https://claude.ai/artifact/BZdkK499mQKXtWkRuLCxuU |
 
 ## Sådan får en session sit eget trinkort
 
