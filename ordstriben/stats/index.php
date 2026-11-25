@@ -191,27 +191,30 @@ function ratio(float $a, float $b): ?float {
     return $b > 0 ? round($a / $b, 4) : null;
 }
 
+/** Afrunder nedad til to betydende cifre, fx 98.450 til 98.000 og 1.234 til 1.200. Under 10 til hele tal. */
+function rough(float $n): int {
+    if ($n < 10) return (int) floor($n);
+    if ($n < 100) return (int) (floor($n / 10) * 10);
+    $p = 10 ** (floor(log10($n)) - 1);
+    return (int) (floor($n / $p) * $p);
+}
+
 /**
- * De samlede tal til dashboardet. Et tal med færre end MIN_USERS brugere bag gives som null.
- * Fordelinger viser kun grupper med mindst MIN_USERS brugere. De øvrige samles i "andre", hvis de er nok.
+ * De samlede tal til dashboardet. Antallet af brugere gives aldrig ud. Totaler og gennemsnit pr. bruger
+ * afrundes til to betydende cifre, så antallet af brugere kun kan gisnes groft. Med færre end MIN_USERS
+ * brugere bag gives null.
+ * Fordelinger er andele i hele procent og viser kun grupper med mindst MIN_USERS brugere. Resten samles i "andre".
  */
 function summary(string $dir): array {
-    $tz = new DateTimeZone('Europe/Copenhagen');
-    $today = (new DateTime('now', $tz))->format('Y-m-d');
-    $weekAgo = time() - 7 * 86400;
-    $users = 0; $usersToday = 0; $users7 = 0;
+    $users = 0; $usersWithOk = 0;
     $events = 0; $ok = 0; $files = 0; $words = 0; $chars = 0; $audio = 0; $wait = 0;
-    $usersWithOk = 0;
     $lang = []; $engine = [];
     foreach (glob($dir . '/u_*.json') ?: [] as $f) {
         $d = json_decode((string) file_get_contents($f), true);
         if (!is_array($d) || empty($d['events'])) continue;
         $users++;
-        $seenToday = false; $seen7 = false; $hadOk = false; $ul = []; $ue = [];
+        $hadOk = false; $ul = []; $ue = [];
         foreach ($d['events'] as $e) {
-            $ts = strtotime((string) $e['t']);
-            if ((new DateTime('@' . $ts))->setTimezone($tz)->format('Y-m-d') === $today) $seenToday = true;
-            if ($ts >= $weekAgo) $seen7 = true;
             $events++;
             if ($e['kind'] === 'file') $files++;
             $ul[$e['lang']] = true;
@@ -221,32 +224,40 @@ function summary(string $dir): array {
                 $words += $e['words']; $chars += $e['chars']; $audio += $e['audio_ms']; $wait += $e['wait_ms'];
             }
         }
-        if ($seenToday) $usersToday++;
-        if ($seen7) $users7++;
         if ($hadOk) $usersWithOk++;
         foreach (array_keys($ul) as $k) $lang[$k] = ($lang[$k] ?? 0) + 1;
         foreach (array_keys($ue) as $k) $engine[$k] = ($engine[$k] ?? 0) + 1;
     }
     $enough = $users >= MIN_USERS;
-    $show = fn(int $n) => $n >= MIN_USERS ? $n : null;
+    $per = $enough && $usersWithOk >= MIN_USERS;
     $dist = function (array $counts) use ($enough): ?array {
         if (!$enough) return null;
         arsort($counts);
-        $out = []; $rest = 0;
-        foreach ($counts as $k => $n) { if ($n >= MIN_USERS) $out[(string) $k] = $n; else $rest += $n; }
-        if ($rest >= MIN_USERS) $out['andre'] = $rest;
+        $keep = []; $rest = 0;
+        foreach ($counts as $k => $n) { if ($n >= MIN_USERS) $keep[(string) $k] = $n; else $rest += $n; }
+        if ($rest >= MIN_USERS) $keep['andre'] = $rest;
+        $sum = array_sum($keep);
+        $out = [];
+        foreach ($keep as $k => $n) $out[$k] = (int) round($n / $sum * 100);
         return $out;
     };
-    $savedMin = $words / TYPING_WPM - $audio / 60000;
+    $savedMin = max(0, $words / TYPING_WPM - $audio / 60000);
     return [
         'updated' => gmdate('Y-m-d\TH:i:s\Z'),
         'min_users' => MIN_USERS,
-        'users' => ['today' => $show($usersToday), 'week' => $show($users7), 'total' => $show($users)],
-        'dictations' => $enough ? $ok : null,
-        'words' => $enough ? $words : null,
-        'words_per_user' => $enough && $usersWithOk >= MIN_USERS ? (int) round($words / $usersWithOk) : null,
-        'keystrokes_saved' => $enough ? $chars : null,
-        'minutes_saved' => $enough ? (int) max(0, round($savedMin)) : null,
+        'enough' => $enough,
+        'total' => [
+            'dictations' => $enough ? rough($ok) : null,
+            'words' => $enough ? rough($words) : null,
+            'keystrokes_saved' => $enough ? rough($chars) : null,
+            'minutes_saved' => $enough ? rough($savedMin) : null,
+        ],
+        'per_user' => [
+            'dictations' => $per ? rough($ok / $usersWithOk) : null,
+            'words' => $per ? rough($words / $usersWithOk) : null,
+            'keystrokes_saved' => $per ? rough($chars / $usersWithOk) : null,
+            'minutes_saved' => $per ? rough($savedMin / $usersWithOk) : null,
+        ],
         'words_per_minute' => $enough && $audio > 0 ? round($words / ($audio / 60000), 1) : null,
         'avg_wait_ms' => $enough && $ok > 0 ? (int) round($wait / $ok) : null,
         'success_rate' => $enough ? ratio($ok, $events) : null,
