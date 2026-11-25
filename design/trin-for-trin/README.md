@@ -4,6 +4,8 @@ Jesper kalder den **trinkort**, ligesom valgkort. Beder han om trinkort, så bru
 
 En kortbunke, som guider Jesper gennem en opgave i fx Google Search Console, Play Console eller Simply. Hvert kort har ét trin med stor tekst. Han swiper eller bladrer, krydser trin af og kan sende en besked til Claude fra hvert kort.
 
+Skal en anden session have sit eget trinkort, så kopiér hele `KOPIER-TIL-SESSION.md` her i mappen ind i den session.
+
 Hver session har sit eget trinkort. Så går Jespers beskeder fra kortene direkte til den session, der har lavet vejledningen, og sessionerne kan ikke overskrive hinandens vejledninger. Kilden er `trin-for-trin.html` her i mappen. Mappen `design/` udgives ikke på qdigital.dk.
 
 Kendte trinkort:
