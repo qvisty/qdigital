@@ -17,6 +17,8 @@
     .lbl3 { animation-name: lbl3; }
     .lbl4 { animation-name: lbl4; }
     .words { animation-name: words; }
+    .waves { animation-name: waves; }
+    .mic { animation-name: mic; }
 
     @keyframes bubble { 0%,4% { opacity: 0; transform: scale(.4); } 8%,90% { opacity: 1; transform: scale(1); } 96%,100% { opacity: 0; transform: scale(.4); } }
     @keyframes tap { 0%,10% { opacity: 0; transform: scale(.6); } 12% { opacity: .45; transform: scale(1); } 16%,100% { opacity: 0; transform: scale(1.6); } }
@@ -31,13 +33,16 @@
     @keyframes lbl3 { 0%,57% { opacity: 0; } 59%,72% { opacity: 1; } 74%,100% { opacity: 0; } }
     @keyframes lbl4 { 0%,74% { opacity: 0; } 76%,93% { opacity: 1; } 96%,100% { opacity: 0; } }
     @keyframes words { 0%,17% { opacity: 0; } 19%,44% { opacity: 1; } 46%,100% { opacity: 0; } }
+    @keyframes waves { 0%,15% { opacity: 1; } 16%,57% { opacity: 0; } 58%,100% { opacity: 1; } }
+    @keyframes mic { 0%,15% { opacity: 0; } 16%,57% { opacity: 1; } 58%,100% { opacity: 0; } }
     @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
     .blink { animation: blink 1s steps(1) infinite; }
 
     @media (prefers-reduced-motion: reduce) {
       .a, .blink { animation: none; }
       .bubble { opacity: 1; }
-      .tap, .listen, .pause, .amber, .lbl1, .lbl2, .lbl2b, .lbl3, .words { opacity: 0; }
+      .tap, .listen, .pause, .amber, .lbl1, .lbl2, .lbl2b, .lbl3, .words, .mic { opacity: 0; }
+      .waves { opacity: 1; }
       .type { transform: none; }
       .caret { transform: translateX(179px); }
       .lbl4 { opacity: 1; }
@@ -76,9 +81,15 @@
   <!-- Boblen ved feltet -->
   <g class="a bubble">
     <circle cx="282" cy="262" r="22" fill="#EAF3FC" stroke="#FFFFFF" stroke-width="3"/>
-    <g fill="none" stroke-linecap="round" stroke-width="3.2">
+    <g class="a waves" fill="none" stroke-linecap="round" stroke-width="3.2">
       <path d="M 270 257 C 274 252, 278 252, 282 257 S 290 262, 294 257" stroke="#5FA8E0"/>
       <path d="M 270 266 C 274 261, 278 261, 282 266 S 290 271, 294 266" stroke="#9CCBEF"/>
+    </g>
+    <!-- Mikrofon, mens der lyttes -->
+    <g class="a mic" opacity="0">
+      <rect x="277" y="249" width="10" height="16" rx="5" fill="#2E7D32"/>
+      <path d="M 272.5 260 a 9.5 9.5 0 0 0 19 0" fill="none" stroke="#2E7D32" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M 282 269.5 V 275 M 277.5 275 H 286.5" fill="none" stroke="#2E7D32" stroke-width="2.4" stroke-linecap="round"/>
     </g>
     <!-- Ringe: grøn mens der lyttes, grøn nedtælling ved pause, gul mens teksten skrives -->
     <circle class="a listen" cx="282" cy="262" r="26" fill="none" stroke="#2E7D32" stroke-width="4" opacity="0"/>
@@ -90,9 +101,9 @@
   <!-- Tryk -->
   <circle class="a tap" cx="282" cy="262" r="30" fill="#1E3A5F" opacity="0"/>
 
-  <!-- Talt tekst som boble -->
+  <!-- Talt tekst som taleboble med spids ned mod den, der taler -->
   <g class="a words" opacity="0">
-    <rect x="70" y="282" width="176" height="34" rx="17" fill="#EAF3FC"/>
+    <path d="M 87 282 H 229 A 17 17 0 0 1 246 299 A 17 17 0 0 1 229 316 H 112 L 92 332 L 98 316 H 87 A 17 17 0 0 1 70 299 A 17 17 0 0 1 87 282 Z" fill="#EAF3FC" stroke="#C9DAEA" stroke-width="1.5" stroke-linejoin="round"/>
     <text x="158" y="304" font-size="13" fill="#1E3A5F" text-anchor="middle">“Vi ses klokken 14 …”</text>
   </g>
 
