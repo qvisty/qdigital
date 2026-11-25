@@ -65,3 +65,7 @@ Noteret 25. november 2026. Ret disse ting, når produktet er færdigt og udgives
 2. **mitcv.com**: siden sender videre til `www.mitcv.com`, men canonical og sitemap bruger `mitcv.com` uden www. Vælg én adresse alle steder. `og:image` mangler, og `/llms.txt` giver en almindelig side med `lang="llms.txt"` i stedet for en 404 eller en rigtig fil.
 3. **Rattid**: der mangler canonical og `sitemap.xml`, og `og:image` er et lånt pegasus billede fra Wikimedia. Vælg den endelige adresse, fx rattid.mitcv.com eller et eget domæne.
 4. For alle: tilføj domænet i Google Search Console og Bing Webmaster Tools, send sitemap ind, og tillad AI crawlere i `robots.txt` på de offentlige sider.
+
+## Trin for trin
+
+Kortbunken til vejledninger trin for trin ligger på https://claude.ai/artifact/Vv4xmeeLDoqvnjLh5jk8BT. Kilde og vejledning til andre sessioner står i `design/trin-for-trin/README.md`. Jesper vil gerne have vejledninger i den form.

@@ -1,0 +1,387 @@
+<title>Trin for trin</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+  /* Layout: én kortbunke midt på skærmen. Swipe eller pil for at bladre. Ét trin pr. kort.
+     Vejledningen ligger i db som guides/current, og hvor langt man er, i progress/<id>. */
+  :root {
+    --bg: #EEF4F1;
+    --card: #FFFFFF;
+    --card-under: #DCE7E1;
+    --fg: #13241D;
+    --muted: #4E6359;
+    --line: #CBDDD3;
+    --accent: #007A53;
+    --accent-ink: #FFFFFF;
+    --done: #1E8E5A;
+    --chip: #E2F1E9;
+    --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1814; --card: #17241E; --card-under: #1F3028; --fg: #E6F2EC; --muted: #9FB8AC;
+      --line: #2C4238; --accent: #3FBF8A; --accent-ink: #0B1A13; --done: #4ED39A; --chip: #1E3229;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E1814; --card: #17241E; --card-under: #1F3028; --fg: #E6F2EC; --muted: #9FB8AC;
+    --line: #2C4238; --accent: #3FBF8A; --accent-ink: #0B1A13; --done: #4ED39A; --chip: #1E3229;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 18px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  header { padding-block: 14px 8px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; max-width: 640px; width: 100%; margin: 0 auto; }
+  header h1 { font: 700 20px var(--display); margin: 0; min-width: 0; }
+  .count { font: 500 15px var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .sync { width: 100%; font: 500 13px var(--body); color: var(--muted); }
+  .stage { flex: 1; min-height: 0; position: relative; max-width: 640px; width: 100%; margin: 0 auto; touch-action: pan-y; }
+  .card {
+    position: absolute; inset: 8px 0 12px; background: var(--card); border: 1px solid var(--line); border-radius: 24px;
+    padding: 28px 24px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(10, 40, 28, .10); transition: transform .28s ease, opacity .28s ease;
+  }
+  .card.under { transform: translateY(10px) scale(.96); background: var(--card-under); box-shadow: none; z-index: 0; }
+  .card.top { z-index: 1; cursor: grab; }
+  .card.dragging { cursor: grabbing; }
+  .card h2, .card p, .card .step-label { cursor: text; }
+  .card.dragging { transition: none; }
+  .step-label { font: 600 14px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .card h2 { font: 700 clamp(28px, 7vw, 38px)/1.15 var(--display); margin: 0; text-wrap: balance; }
+  .card p { font-size: clamp(19px, 4.6vw, 22px); line-height: 1.5; margin: 0; max-width: 34ch; }
+  .card .note { font-size: 17px; color: var(--muted); }
+  .ui { font-weight: 600; background: var(--chip); border-radius: 8px; padding: 1px 8px; white-space: nowrap; }
+  .copy { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .copy code { font: 600 clamp(17px, 4.4vw, 21px) ui-monospace, "SF Mono", Menlo, monospace; background: var(--chip); border: 1px dashed var(--line); border-radius: 12px; padding: 10px 14px; word-break: break-all; user-select: all; min-width: 0; }
+  .copy button, .link { font: 600 17px var(--body); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 12px; padding: 12px 18px; cursor: pointer; text-decoration: none; display: inline-block; }
+  .foot { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+  .fb { border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+  .fb summary { font: 600 17px var(--body); color: var(--accent); cursor: pointer; }
+  .fb-body { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font: 500 16px var(--body); background: var(--chip); color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+  .fb-label { font: 600 15px var(--body); color: var(--muted); }
+  .fb textarea { font: 17px/1.4 var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; resize: vertical; width: 100%; box-sizing: border-box; }
+  .send { align-self: flex-start; font: 600 17px var(--body); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 12px; padding: 12px 18px; cursor: pointer; }
+  .send:disabled { opacity: .5; }
+  .send.big { align-self: stretch; font-size: 20px; padding: 18px 22px; border-radius: 16px; }
+  .fb-status { font-size: 15px !important; color: var(--muted); margin: 0; }
+  .check { display: flex; gap: 12px; align-items: center; font: 600 19px var(--body); cursor: pointer; padding: 14px 16px; border-radius: 14px; border: 2px solid var(--line); }
+  .check input { width: 26px; height: 26px; accent-color: var(--done); }
+  .check.is-done { border-color: var(--done); color: var(--done); }
+  .finish h2 { color: var(--done); }
+  .empty h2 { color: var(--muted); }
+  nav { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding-block: 6px 14px; max-width: 640px; width: 100%; margin: 0 auto; }
+  nav button { font: 600 18px var(--body); border-radius: 16px; padding: 16px 22px; cursor: pointer; background: var(--card); color: var(--fg); border: 1px solid var(--line); min-width: 120px; }
+  nav button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  nav button:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-width: 0; }
+  .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+  .dots span.on { background: var(--accent); transform: scale(1.25); }
+  .dots span.ok { background: var(--done); }
+  button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+
+<header>
+  <h1 id="title">Trin for trin</h1>
+  <div class="count" id="count" aria-live="polite"></div>
+  <div class="sync" id="sync">Henter vejledningen</div>
+</header>
+<main class="stage" id="stage" aria-roledescription="kortbunke"></main>
+<nav>
+  <button id="prev" type="button">Tilbage</button>
+  <div class="dots" id="dots" aria-hidden="true"></div>
+  <button id="next" type="button" class="primary">Næste</button>
+</nav>
+
+<script>
+// Claude lægger den aktuelle vejledning i db som guides/current: {id, name, part?, parts?, next?, steps: [{title, text, copy?, link?, note?}]}.
+// part og parts viser "Del 1 af 2", og next er navnet på næste del, som sidste kort nævner.
+// [[Navn]] vises som et knapnavn fra skærmen. Hvor langt man er, gemmes i progress/<id>, så Claude kan læse det.
+const DONE_CARD = { done: true, title: "Færdig", text: "Godt gået. Tryk på knappen, så ved Claude, at du er færdig, og tager næste skridt." };
+const $ = (id) => document.getElementById(id);
+
+let guide = null;
+let index = 0;
+let checked = new Set();
+let db = null;
+let progressLoaded = false;
+let saveTimer = null;
+let saving = false;
+let pendingSave = false;
+
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function rich(s) { return esc(s).replace(/\[\[(.+?)\]\]/g, '<span class="ui">$1</span>'); }
+function safeHref(h) { return typeof h === "string" && h.startsWith("https://") ? h : null; }
+function cards() { return guide ? guide.steps.concat([DONE_CARD]) : []; }
+
+function cardHtml(step, i) {
+  const total = guide.steps.length;
+  if (step.done) {
+    const more = guide.parts > 1 && guide.part < guide.parts;
+    const title = more ? `Del ${guide.part} af ${guide.parts} er færdig` : step.title;
+    const text = more
+      ? `Der er en del mere. Tryk på knappen, så lægger Claude del ${guide.part + 1}${guide.next ? ": " + guide.next : ""} her på siden.`
+      : step.text;
+    return `<div class="finish"><span class="step-label">${esc(guide.name)}</span></div><h2>${esc(title)}</h2><p>${rich(text)}</p><p class="note">${checked.size} af ${total} trin er krydset af.</p><div class="foot"><button type="button" class="send big" data-done-send>Send done til Claude</button><p class="fb-status" aria-live="polite"></p></div>`;
+  }
+  let html = `<span class="step-label">Trin ${i + 1} af ${total}</span><h2>${esc(step.title || "")}</h2><p>${rich(step.text || "")}</p>`;
+  if (step.copy) html += `<div class="copy"><code>${esc(step.copy)}</code><button type="button" data-copy="${esc(step.copy)}">Kopiér</button></div>`;
+  const href = step.link && safeHref(step.link.href);
+  if (href) html += `<a class="link" href="${esc(href)}" target="_blank" rel="noopener">${esc(step.link.label || "Åbn")}</a>`;
+  if (step.note) html += `<p class="note">${rich(step.note)}</p>`;
+  const on = checked.has(i);
+  html += `<div class="foot"><label class="check${on ? " is-done" : ""}"><input type="checkbox" id="chk-${esc(guide.id)}-${i}" data-step="${i}"${on ? " checked" : ""}> Gjort</label>`;
+  html += feedbackHtml(i) + `</div>`;
+  return html;
+}
+
+// Feedback fra et kort: hurtige knapper og fri tekst. Sendes til Claude som en kommentar på kortet.
+const QUICK = ["Det virker ikke", "Skærmen ser anderledes ud", "Jeg er i tvivl", "Knappen hedder noget andet"];
+function feedbackHtml(i) {
+  return `<details class="fb" id="fb-${esc(guide.id)}-${i}">
+    <summary>Sig noget til Claude</summary>
+    <div class="fb-body">
+      <div class="chips">${QUICK.map((q) => `<button type="button" class="chip" data-quick="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      <label class="fb-label" for="fbt-${esc(guide.id)}-${i}">Skriv selv</label>
+      <textarea id="fbt-${esc(guide.id)}-${i}" rows="3" placeholder="Fx: Jeg kan ikke finde knappen"></textarea>
+      <button type="button" class="send" data-send="${i}">Send til Claude</button>
+      <p class="fb-status" aria-live="polite"></p>
+    </div>
+  </details>`;
+}
+
+async function sendFeedback(card, i, text, statusEl, sendBtn) {
+  const step = guide.steps[i];
+  const full = step ? `${guide.name}, trin ${i + 1} af ${guide.steps.length} (${step.title}): ${text}` : text;
+  statusEl.textContent = "Sender";
+  sendBtn.disabled = true;
+  // Beskeden gemmes altid i db først, så Claude kan læse den, også hvis kommentaren ikke kan sendes
+  let saved = false;
+  try {
+    if (db) { await db.collection("messages").add({ guide: guide.id, step: i, text: full, sent: new Date().toISOString() }); saved = true; }
+  } catch (e) {}
+  const failed = (code) => {
+    statusEl.textContent = saved
+      ? `Beskeden er gemt, men Claude fik ikke besked med det samme (${code}). Skriv "se besked" i chatten, så læser Claude den.`
+      : `Kunne ikke sende (${code}). Skriv det samme i chatten med Claude.`;
+  };
+  try {
+    const comments = window.claude ? await window.claude.use("comments") : null;
+    if (!comments) throw { code: "ingen kommentarer her" };
+    const anchor = await comments.anchorFor(card);
+    const can = comments.canSendToClaude ? await comments.canSendToClaude() : "off";
+    if (can === "available") {
+      await comments.sendToClaude({ anchor, text: full });
+      statusEl.textContent = i < 0
+        ? "Sendt. Du kan lukke denne visning nu."
+        : "Sendt. Claude svarer i chatten eller i en kommentar her.";
+      const ta = card.querySelector("textarea");
+      if (ta) ta.value = "";
+    } else {
+      failed("Claude: " + can);
+    }
+  } catch (e) {
+    if (e && e.code === "consent_required") statusEl.textContent = "Siden fik ikke lov til at sende. Tryk igen og tillad det." + (saved ? " Beskeden er gemt." : "");
+    else failed((e && e.code) || "ukendt fejl");
+  }
+  sendBtn.disabled = false;
+}
+
+function renderEmpty(text) {
+  $("stage").innerHTML = `<section class="card top empty"><span class="step-label">Trin for trin</span><h2>Ingen vejledning lige nu</h2><p>${esc(text)}</p></section>`;
+  $("count").textContent = "";
+  $("dots").innerHTML = "";
+  $("prev").disabled = true;
+  $("next").disabled = true;
+}
+
+function render() {
+  if (!guide) return;
+  const list = cards();
+  if (index >= list.length) index = list.length - 1;
+  const stage = $("stage");
+  stage.innerHTML = "";
+  if (index + 1 < list.length) {
+    const under = document.createElement("section");
+    under.className = "card under";
+    under.setAttribute("aria-hidden", "true");
+    stage.appendChild(under);
+  }
+  const top = document.createElement("section");
+  top.className = "card top";
+  top.innerHTML = cardHtml(list[index], index);
+  stage.appendChild(top);
+  bindCard(top);
+  $("title").textContent = guide.parts > 1 ? `Del ${guide.part} af ${guide.parts}: ${guide.name}` : guide.name;
+  $("count").textContent = list[index].done ? "Færdig" : `Trin ${index + 1} af ${guide.steps.length}`;
+  $("prev").disabled = index === 0;
+  $("next").disabled = false;
+  $("next").textContent = index >= list.length - 1 ? "Forfra" : "Næste";
+  $("dots").innerHTML = list.map((_, i) => `<span class="${i === index ? "on" : checked.has(i) ? "ok" : ""}"></span>`).join("");
+}
+
+// Gemmer hvor langt man er. Højst én skrivning ad gangen, samlet efter en kort pause.
+function queueSave() {
+  if (!db || !guide || !progressLoaded) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(save, 600);
+}
+async function save() {
+  if (saving) { pendingSave = true; return; }
+  saving = true;
+  const list = cards();
+  const step = list[index];
+  try {
+    await db.doc("progress/" + guide.id).set({
+      guide: guide.id,
+      index,
+      step: step.done ? "Færdig" : `Trin ${index + 1}: ${step.title}`,
+      checked: [...checked].sort((a, b) => a - b),
+      updated: new Date().toISOString()
+    });
+    $("sync").textContent = "Claude kan se, hvor langt du er";
+  } catch (e) {
+    $("sync").textContent = "Kunne ikke gemme, hvor langt du er. Send et skærmbillede i stedet.";
+  }
+  saving = false;
+  if (pendingSave) { pendingSave = false; save(); }
+}
+
+function go(delta) {
+  const list = cards();
+  if (!list.length) return;
+  let n = index + delta;
+  if (n >= list.length) n = 0;
+  if (n < 0) return;
+  index = n;
+  render();
+  queueSave();
+}
+
+function bindCard(el) {
+  el.querySelectorAll("input[data-step]").forEach((box) => box.addEventListener("change", () => {
+    const i = Number(box.dataset.step);
+    box.checked ? checked.add(i) : checked.delete(i);
+    if (box.checked) setTimeout(() => go(1), 250); else { render(); queueSave(); }
+  }));
+  el.querySelectorAll("button[data-done-send]").forEach((btn) => btn.addEventListener("click", () => {
+    const more = guide.parts > 1 && guide.part < guide.parts;
+    const text = more
+      ? `done. Del ${guide.part} af ${guide.parts} (${guide.name}) er færdig. Læg del ${guide.part + 1} på siden.`
+      : `done. ${guide.name} er færdig.`;
+    sendFeedback(el, -1, text, el.querySelector(".fb-status"), btn);
+  }));
+  el.querySelectorAll("button[data-quick]").forEach((btn) => btn.addEventListener("click", () => {
+    const ta = el.querySelector("textarea");
+    ta.value = ta.value ? ta.value + ". " + btn.dataset.quick : btn.dataset.quick;
+    ta.focus();
+  }));
+  el.querySelectorAll("button[data-send]").forEach((btn) => btn.addEventListener("click", () => {
+    const ta = el.querySelector("textarea");
+    const status = el.querySelector(".fb-status");
+    const text = ta.value.trim();
+    if (!text) { status.textContent = "Vælg en knap eller skriv noget først."; return; }
+    sendFeedback(el, Number(btn.dataset.send), text, status, btn);
+  }));
+  el.querySelectorAll("button[data-copy]").forEach((btn) => btn.addEventListener("click", () => {
+    const text = btn.dataset.copy;
+    const ok = () => { btn.textContent = "Kopieret"; setTimeout(() => { btn.textContent = "Kopiér"; }, 1600); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(btn.previousElementSibling); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "Markeret"; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+  }));
+  // Træk i kortet fra et tomt sted. På tekst kan man markere i stedet. Over 90 px skifter kortet.
+  let x0 = null, y0 = 0, dx = 0, horizontal = false;
+  el.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("button, a, input, label, code, details, textarea, h2, p, .step-label, .ui")) return;
+    x0 = e.clientX; y0 = e.clientY; dx = 0; horizontal = false;
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (x0 === null) return;
+    dx = e.clientX - x0;
+    const sel = window.getSelection && String(window.getSelection());
+    if (sel) { x0 = null; el.style.transform = ""; return; }
+    if (!horizontal && Math.abs(dx) > 18 && Math.abs(dx) > 2 * Math.abs(e.clientY - y0)) { horizontal = true; el.setPointerCapture(e.pointerId); el.classList.add("dragging"); }
+    if (horizontal) el.style.transform = `translateX(${dx}px) rotate(${dx / 40}deg)`;
+  });
+  const end = () => {
+    if (x0 === null) return;
+    x0 = null;
+    el.classList.remove("dragging");
+    if (horizontal && Math.abs(dx) > 90) {
+      const dir = dx < 0 ? 1 : -1;
+      if (dir === -1 && index === 0) { el.style.transform = ""; return; }
+      el.style.transform = `translateX(${dx < 0 ? -120 : 120}%) rotate(${dx < 0 ? -8 : 8}deg)`;
+      el.style.opacity = "0";
+      setTimeout(() => go(dir), 200);
+    } else {
+      el.style.transform = "";
+    }
+  };
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+}
+
+function validGuide(g) {
+  return g && typeof g.id === "string" && /^[A-Za-z0-9_-]{1,60}$/.test(g.id) && Array.isArray(g.steps) && g.steps.length > 0;
+}
+
+async function loadProgress() {
+  progressLoaded = false;
+  try {
+    const snap = await db.doc("progress/" + guide.id).get();
+    const p = snap.exists ? snap.data() : null;
+    index = p && Number.isInteger(p.index) ? Math.max(0, Math.min(p.index, guide.steps.length)) : 0;
+    checked = new Set(p && Array.isArray(p.checked) ? p.checked.filter(Number.isInteger) : []);
+  } catch (e) {
+    index = 0; checked = new Set();
+  }
+  progressLoaded = true;
+  render();
+}
+
+$("prev").addEventListener("click", () => go(-1));
+$("next").addEventListener("click", () => go(1));
+document.addEventListener("keydown", (e) => {
+  if (e.target.closest("input, textarea, details")) return;
+  if (e.key === "ArrowRight") go(1);
+  if (e.key === "ArrowLeft") go(-1);
+});
+
+renderEmpty("Vejledningen hentes.");
+(async () => {
+  db = window.claude ? await window.claude.use("db") : null;
+  if (!db) {
+    $("sync").textContent = "Vejledningen kan ikke hentes her. Åbn siden i Claude, mens du er logget ind.";
+    renderEmpty("Åbn siden i Claude, mens du er logget ind.");
+    return;
+  }
+  const timer = setTimeout(() => { $("sync").textContent = "Vejledningen svarer ikke endnu. Prøv at genindlæse om lidt."; }, 10000);
+  let currentId = null;
+  db.doc("guides/current").onSnapshot((snap) => {
+    if (!snap.metadata.fromCache) clearTimeout(timer);
+    const g = snap.exists ? snap.data() : null;
+    if (!validGuide(g)) {
+      guide = null;
+      if (!snap.metadata.fromCache) { $("sync").textContent = ""; renderEmpty("Claude lægger den næste vejledning her, når der er brug for den."); }
+      return;
+    }
+    const parts = Number.isInteger(g.parts) && g.parts > 1 ? g.parts : 1;
+    const part = Number.isInteger(g.part) && g.part >= 1 && g.part <= parts ? g.part : 1;
+    guide = { id: g.id, name: typeof g.name === "string" ? g.name : "Trin for trin", steps: g.steps, part, parts, next: typeof g.next === "string" ? g.next : "" };
+    $("sync").textContent = "Claude kan se, hvor langt du er";
+    if (g.id !== currentId) { currentId = g.id; loadProgress(); } else render();
+  }, () => {
+    clearTimeout(timer);
+    $("sync").textContent = "Vejledningen kan ikke hentes lige nu.";
+  });
+})();
+</script>
