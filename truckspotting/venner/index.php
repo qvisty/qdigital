@@ -19,9 +19,11 @@ define('UNUSED_AGE', (int) (getenv('VENNER_UNUSED_AGE') ?: 30 * 86400));
 /** Højst så mange afsendere i én spand i rate.json, så filen ikke kan vokse uden loft. */
 define('MAX_SENDERS', (int) (getenv('VENNER_MAX_SENDERS') ?: 5000));
 const MAX_IDS = 50;
-const MAX_BODY = 4096;
+const MAX_BODY = 16384;
+/** Højst så mange modeller i "have". Kataloget har i dag omkring 100. */
+const MAX_HAVE = 600;
 
-/** Skemaet for en profil: felt => [mindst, højst]. finds kontrolleres for sig. */
+/** Skemaet for en profil: felt => [mindst, højst]. finds og have kontrolleres for sig. */
 const SCHEMA = [
     'v' => [1, 1],
     'level' => [1, 999],
@@ -137,7 +139,7 @@ function catalog_ids(): array {
 /** Profilen præcis efter skemaet, eller null. Ukendte felter, forkerte typer og tal uden for grænserne afvises. */
 function valid_profile(mixed $p): ?array {
     if (!is_array($p) || array_is_list($p) && $p !== []) return null;
-    $allowed = array_merge(array_keys(SCHEMA), ['finds']);
+    $allowed = array_merge(array_keys(SCHEMA), ['finds', 'have']);
     foreach (array_keys($p) as $k) if (!in_array($k, $allowed, true)) return null;
     $out = [];
     foreach (SCHEMA as $k => [$min, $max]) {
@@ -151,6 +153,14 @@ function valid_profile(mixed $p): ?array {
     foreach ($finds as $f) if (!is_string($f) || strlen($f) > 80) return null;
     // Ukendte fund udelades i stedet for at afvise hele profilen. Appen kan kende nyere modeller end serverens kopi
     $out['finds'] = array_values(array_filter($finds, fn($f) => isset($known[$f])));
+    // Hvilke katalogmodeller man har, til duel med venner. Kun når brugeren har sagt ja, så feltet kan mangle.
+    // Kun katalog id'er. Egne modeller sendes aldrig med navn
+    if (array_key_exists('have', $p)) {
+        $have = $p['have'];
+        if (!is_array($have) || !array_is_list($have) || count($have) > MAX_HAVE) return null;
+        foreach ($have as $h) if (!is_string($h) || strlen($h) > 80) return null;
+        $out['have'] = array_values(array_unique(array_filter($have, fn($h) => isset($known[$h]))));
+    }
     return $out;
 }
 
