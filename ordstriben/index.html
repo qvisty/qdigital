@@ -33,6 +33,7 @@
   .badges { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
   .play { display:inline-flex; align-items:center; gap:8px; background:var(--fg); color:var(--bg); border-radius:999px; padding:8px 18px; font-weight:600; text-decoration:none; }
   .play svg { width:16px; height:16px; }
+  .play.ghost { background:transparent; color:var(--fg); border:2px solid var(--fg); padding:6px 16px; }
   .status-note { display:block; margin-top:10px; color:var(--muted); font-size:15px; }
   .demo { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:20px; box-shadow:0 10px 30px rgba(30,58,95,.10); }
   .field { border:1px solid var(--line); border-radius:12px; padding:12px 14px; min-height:84px; font-size:16px; position:relative; }
@@ -83,9 +84,10 @@
         <p class="lead">Tal dansk i alle apps på din Android telefon. Tryk på boblen ved tekstfeltet, sig det, du vil skrive, og teksten sættes ind ved markøren.</p>
         <div class="badges">
           <span class="status"><i></i>Under test</span>
-          <a class="play" href="https://play.google.com/store/apps/details?id=dk.ordstriben.app&amp;referrer=utm_source%3Dqdigital"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 9-14 9z" fill="currentColor"/></svg>Google Play</a>
+          <a class="play" href="test/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 9-14 9z" fill="currentColor"/></svg>Bliv tester</a>
+          <a class="play ghost" href="https://play.google.com/store/apps/details?id=dk.ordstriben.app&amp;referrer=utm_source%3Dqdigital"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 9-14 9z" fill="currentColor"/></svg>Google Play</a>
         </div>
-        <span class="status-note">Ordstriben er i lukket test og kommer snart til alle på Android. Indtil da virker linket til Google Play kun for testere. <a href="test/">Bliv tester</a>.</span>
+        <span class="status-note">Ordstriben er i lukket test og kommer snart til alle på Android. Du kan prøve den allerede nu som tester. Det er gratis og tager et par minutter. Knappen til Google Play virker, når du er tester.</span>
       </div>
       <div class="demo" aria-label="Eksempel på Ordstriben i en besked">
         <div class="field"><span class="label">Besked</span>Jeg er hjemme om en halv time, skal jeg købe mælk med<span class="cursor"></span></div>
