@@ -16,6 +16,7 @@ Kendte trinkort:
 | TS Projekt kvalificering og udvikling (Truckspotting) | https://claude.ai/artifact/BZdkK499mQKXtWkRuLCxuU |
 | OS Svensk talemodel til Hugging Face (Ordstriben) | https://claude.ai/artifact/55f7iRe1yC8QiVkT5fCzN4 |
 | OS Status (Ordstriben) | https://claude.ai/artifact/XFcf1bC5BpQEu55xLLQCae |
+| HS Min-server, hjemmeserveren | https://claude.ai/artifact/8uVkqDVYphoo8jFBPmwsqd |
 
 ## Sådan får en session sit eget trinkort
 
@@ -25,6 +26,11 @@ Første gang:
 2. Ret `<title>` til `Trinkort <projekt>`, fx `Trinkort Truckspotting`.
 3. Udgiv den med værktøjet `Artifact`, `icon: "steps"` og `capabilities: {"db": {"rules": [{"path": "", "read": "view", "write": "owner"}]}, "comments": {}}`. Det er `comments`, der gør, at Jespers beskeder vækker sessionen.
 4. Skriv adressen i sessionens egen CLAUDE.md eller README, og tilføj den i tabellen ovenfor, så Jesper altid får det samme link fra den session.
+
+Godt at vide:
+
+1. Reglen write `owner` er afprøvet. Som `view` kan der slet ikke skrives, og som `interact` afviser reglerne skrivningen. Kun ejeren kan altså skrive fremdrift og beskeder.
+2. En side med database får ikke automatisk et billede på sit kort i galleriet. Udgivelsen advarer selv om det. Vil man have et billede, skal det laves i hånden og må ikke vise nogen data.
 
 Siden skal ikke udgives igen for en ny vejledning. Alt andet sker med værktøjet `ArtifactData` og sessionens egen adresse:
 
