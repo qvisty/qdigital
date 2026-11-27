@@ -13,8 +13,9 @@
 const APP_KEYS = [
     'crowns' => 'a3bcd6e0a1bc73b6ac39ba58ed9d0dcc',
     'pocketssh' => 'bedc9e702d1f2666a2929fc3ee1e24b1',
+    'ordstriben' => 'b785cf6902c595b86aa5d7f1a3822ccd',
 ];
-const APP_NAMES = ['crowns' => 'Crowns', 'pocketssh' => 'Pocket SSH'];
+const APP_NAMES = ['crowns' => 'Crowns', 'pocketssh' => 'Pocket SSH', 'ordstriben' => 'Ordstriben'];
 
 header('Content-Type: application/json; charset=utf-8');
 
