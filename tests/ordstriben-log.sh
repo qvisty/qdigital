@@ -59,6 +59,8 @@ check "DELETE med ugyldigt id giver 400" 400 "$(curl -s -o /dev/null -w '%{http_
 check "DELETE giver 204" 204 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE "$URL?install=$ID1")"
 check "efter DELETE er der intet" 0 "$(curl -s -H "X-Api-Key: $KEY" "$URL" | php -r 'echo count(json_decode(stream_get_contents(STDIN),true)["installs"]);')"
 check "DELETE af ukendt id giver 204" 204 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE "$URL?install=$ID2")"
+check "DELETE med id i header giver 204" 204 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE -H "X-Ordstriben-Install: $ID2" "$URL")"
+check "DELETE med ugyldigt id i header giver 400" 400 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE -H "X-Ordstriben-Install: abc" "$URL")"
 
 # Grænsen er 6 gyldige kald i timen. To er brugt, så 4 mere går igennem, og det næste afvises
 for i in 1 2 3 4; do post "$GOOD" >/dev/null; done

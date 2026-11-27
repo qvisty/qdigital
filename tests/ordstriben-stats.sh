@@ -94,6 +94,8 @@ check "DELETE med ugyldigt id giver 400" 400 "$(curl -s -o /dev/null -w '%{http_
 check "DELETE giver 204" 204 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE "$URL?user=$(uid 5)")"
 S=$(summ)
 check "efter DELETE er der under 5 igen" null "$(js "$S" total.words)"
+check "DELETE med id i header giver 204" 204 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE -H "X-Ordstriben-User: $(uid 4)" "$URL")"
+check "DELETE med ugyldigt id i header giver 400" 400 "$(curl -s -o /dev/null -w '%{http_code}' -X DELETE -H "X-Ordstriben-User: abc" "$URL")"
 
 check "ny bruger over dagsgrænsen giver 429" 429 "$(post "$(batch 6)" >/dev/null; post "$(batch 7)")"
 check "for mange forkerte nøgler giver 429" 429 "$(for i in 1 2 3; do curl -s -o /dev/null -H 'X-Api-Key: forkert' "$URL"; done; curl -s -o /dev/null -w '%{http_code}' -H 'X-Api-Key: forkert' "$URL")"
