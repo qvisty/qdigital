@@ -17,6 +17,7 @@ Kendte trinkort:
 | OS Svensk talemodel til Hugging Face (Ordstriben) | https://claude.ai/artifact/55f7iRe1yC8QiVkT5fCzN4 |
 | OS Status (Ordstriben) | https://claude.ai/artifact/XFcf1bC5BpQEu55xLLQCae |
 | HS Min-server, hjemmeserveren | https://claude.ai/artifact/8uVkqDVYphoo8jFBPmwsqd |
+| SEO Autopilot PRD og SaaS Pegasus setup (qvisty/seo-autopilot) | https://claude.ai/artifact/P5WvYyvb2j6mJWguGed8tB |
 
 ## Sådan får en session sit eget trinkort
 
@@ -31,6 +32,7 @@ Godt at vide:
 
 1. Reglen write `owner` er afprøvet. Som `view` kan der slet ikke skrives, og som `interact` afviser reglerne skrivningen. Kun ejeren kan altså skrive fremdrift og beskeder.
 2. En side med database får ikke automatisk et billede på sit kort i galleriet. Udgivelsen advarer selv om det. Vil man have et billede, skal det laves i hånden og må ikke vise nogen data.
+3. Sendes kilden til en anden session med send_message, kan den komme frem HTML escapet. Modtageren skal så fjerne ét lag escaping, før siden udgives.
 
 Siden skal ikke udgives igen for en ny vejledning. Alt andet sker med værktøjet `ArtifactData` og sessionens egen adresse:
 
