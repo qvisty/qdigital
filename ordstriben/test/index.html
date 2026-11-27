@@ -29,6 +29,10 @@
   .lead { font-size:19px; margin:20px 0 8px; }
   .note { background:var(--note); color:var(--note-fg); border-radius:14px; padding:12px 16px; font-size:16px; margin:16px 0 0; }
   .note[hidden] { display:none; }
+  .voice { background:var(--soft); border:2px solid var(--accent); border-radius:20px; padding:18px 20px; margin:20px 0 0; }
+  .voice h2 { margin:0 0 6px; font-size:20px; }
+  .voice p { margin:0; font-size:17px; color:var(--muted); }
+  .voice b { color:var(--fg); }
   ol.steps { list-style:none; padding:0; margin:24px 0 0; display:grid; gap:16px; }
   .step { background:var(--card); border:2px solid var(--line); border-radius:20px; padding:20px; transition:border-color .2s, opacity .2s; }
   .step.done { border-color:var(--green); }
@@ -66,6 +70,7 @@
     </div>
     <div class="app-id"><img src="../img/ikon-A.svg" width="72" height="72" alt=""><div><h1>Bliv tester</h1><div class="sub">Ordstriben, dansk diktering på Android</div></div></div>
     <p class="lead">Prøv Ordstriben før alle andre. Det tager et par minutter, er gratis, og du kan stoppe, når du vil. Gør de tre trin på din Android telefon.</p>
+    <div class="voice"><h2>Du er med til at forme appen</h2><p>Som tester har du direkte indflydelse på Ordstriben. Under <b>Om</b> i appen finder du <b>Send feedback</b>. Her kan du melde fejl, foreslå rettelser og ønske nye funktioner. Beskederne går direkte til udvikleren.</p></div>
     <p class="note" id="not-android" hidden>Ordstriben findes kun til Android. Åbn denne side på din Android telefon: <b>qdigital.dk/ordstriben/test</b></p>
   </div>
 </header>
@@ -88,7 +93,7 @@
       <div class="head"><span class="num"><span>3</span></span><h2>Installér Ordstriben</h2></div>
       <p>Tryk på knappen og derefter på <b>Installer</b> i Google Play. Åbn appen bagefter. Den viser dig selv resten.</p>
       <a class="btn" data-done="2" href="https://play.google.com/store/apps/details?id=dk.ordstriben.app&amp;referrer=utm_source%3Dtestside" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 9-14 9z" fill="currentColor"/></svg>Åbn i Google Play</a>
-      <div class="ok">Tak fordi du tester. Vi glæder os til at høre fra dig.</div>
+      <div class="ok">Tak fordi du tester. Fortæl os, hvad du synes, under Om og Send feedback i appen.</div>
     </li>
   </ol>
   <button class="reset" id="reset" type="button" hidden>Start forfra</button>
@@ -129,7 +134,7 @@
     </details>
     <details>
       <summary>Hvor sender jeg ros, fejl og idéer?</summary>
-      <p>Skriv til <a href="mailto:kontakt@qdigital.dk?subject=Ordstriben%20test">kontakt@qdigital.dk</a>. Skriv gerne, hvilken telefon du har.</p>
+      <p>Det letteste er <b>Send feedback</b> under <b>Om</b> i appen. Den sender selv appens version med. Du kan også skrive til <a href="mailto:kontakt@qdigital.dk?subject=Ordstriben%20test">kontakt@qdigital.dk</a>.</p>
     </details>
   </div>
 </main>
