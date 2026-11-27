@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bliv tester af Ordstriben</title>
+<meta name="description" content="Prøv Ordstriben før alle andre. Meld dig ind i testgruppen, tryk Bliv tester og installér appen fra Google Play. Det tager et par minutter og er gratis.">
+<meta name="theme-color" content="#DCEEFB">
+<link rel="canonical" href="https://qdigital.dk/ordstriben/test/">
+<meta property="og:title" content="Bliv tester af Ordstriben">
+<meta property="og:description" content="Dansk diktering på Android. Prøv appen før alle andre, gratis.">
+<meta property="og:image" content="https://qdigital.dk/ordstriben/img/play-grafik-1024x500.png">
+<link rel="icon" href="../img/ikon-A.svg" type="image/svg+xml">
+<style>
+  :root { color-scheme: light dark; --bg:#F7FBFE; --fg:#1E3A5F; --muted:#3F6488; --card:#FFFFFF; --line:#D2E8F9; --accent:#5FA8E0; --soft:#DCEEFB; --green:#22A35A; --yellow:#E8B220; --note:#FFF4D6; --note-fg:#6B4E00; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#10233A; --fg:#EAF5FD; --muted:#B9DCF5; --card:#16304F; --line:#2A4A70; --soft:#16304F; --note:#3A3016; --note-fg:#F5DFA0; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:18px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color:inherit; }
+  .wrap { max-width:640px; margin:0 auto; padding:0 16px; }
+  .top { display:flex; justify-content:space-between; align-items:center; padding:18px 0; font-size:15px; }
+  .top a { text-decoration:none; color:var(--muted); }
+  .top b { color:var(--fg); }
+  header { background:linear-gradient(180deg, var(--soft), var(--bg)); padding-bottom:12px; }
+  .app-id { display:flex; align-items:center; gap:16px; margin-top:8px; }
+  .app-id img { width:72px; height:72px; border-radius:20px; box-shadow:0 6px 20px rgba(30,58,95,.15); }
+  h1 { font-size:32px; line-height:1.15; margin:0; }
+  .sub { color:var(--muted); font-size:17px; }
+  .lead { font-size:19px; margin:20px 0 8px; }
+  .note { background:var(--note); color:var(--note-fg); border-radius:14px; padding:12px 16px; font-size:16px; margin:16px 0 0; }
+  .note[hidden] { display:none; }
+  .voice { background:var(--soft); border:2px solid var(--accent); border-radius:20px; padding:18px 20px; margin:20px 0 0; }
+  .voice h2 { margin:0 0 6px; font-size:20px; }
+  .voice p { margin:0; font-size:17px; color:var(--muted); }
+  .voice b { color:var(--fg); }
+  ol.steps { list-style:none; padding:0; margin:24px 0 0; display:grid; gap:16px; }
+  .step { background:var(--card); border:2px solid var(--line); border-radius:20px; padding:20px; transition:border-color .2s, opacity .2s; }
+  .step.done { border-color:var(--green); }
+  .step.done .num { background:var(--green); color:#fff; }
+  .step.done .num span { display:none; }
+  .step.done .num::after { content:"✓"; }
+  .step.later { opacity:.55; }
+  .head { display:flex; align-items:center; gap:14px; }
+  .num { flex:none; display:inline-grid; place-items:center; width:40px; height:40px; border-radius:50%; background:var(--soft); font-weight:700; font-size:20px; }
+  .step h2 { font-size:22px; margin:0; line-height:1.25; }
+  .step p { margin:12px 0 0; color:var(--muted); font-size:17px; }
+  .step p b { color:var(--fg); }
+  .btn { display:flex; justify-content:center; align-items:center; gap:10px; width:100%; margin-top:16px; padding:16px 20px; border-radius:999px; border:0; background:var(--fg); color:var(--bg); font:600 19px/1.2 inherit; font-family:inherit; text-decoration:none; cursor:pointer; }
+  .btn.light { background:transparent; color:var(--fg); border:2px solid var(--line); font-size:17px; padding:12px 18px; }
+  .btn svg { width:18px; height:18px; }
+  .ok { display:none; margin-top:12px; color:var(--green); font-weight:600; font-size:16px; text-align:center; }
+  .step.done .ok { display:block; }
+  h3 { font-size:22px; margin:40px 0 8px; }
+  .faq details { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 18px; margin:10px 0; }
+  .faq summary { cursor:pointer; font-weight:600; font-size:17px; }
+  .faq p, .faq li { color:var(--muted); font-size:16px; }
+  .faq ul { padding-left:20px; }
+  .reset { background:none; border:0; color:var(--muted); text-decoration:underline; font:inherit; font-size:15px; cursor:pointer; padding:0; margin-top:16px; }
+  .foot { margin-top:48px; border-top:1px solid var(--line); padding:22px 0 40px; font-size:14px; color:var(--muted); }
+  .foot .wrap { display:flex; flex-wrap:wrap; gap:8px 24px; justify-content:space-between; }
+  @media (max-width: 420px) { h1 { font-size:28px; } .step h2 { font-size:20px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <a href="/"><b>Q</b> Digital</a>
+      <a href="../">Om Ordstriben</a>
+    </div>
+    <div class="app-id"><img src="../img/ikon-A.svg" width="72" height="72" alt=""><div><h1>Bliv tester</h1><div class="sub">Ordstriben, dansk diktering på Android</div></div></div>
+    <p class="lead">Prøv Ordstriben før alle andre. Det tager et par minutter, er gratis, og du kan stoppe, når du vil. Gør de tre trin på din Android telefon.</p>
+    <div class="voice"><h2>Du er med til at forme appen</h2><p>Som tester har du direkte indflydelse på Ordstriben. Under <b>Om</b> i appen finder du <b>Send feedback</b>. Her kan du melde fejl, foreslå rettelser og ønske nye funktioner. Beskederne går direkte til udvikleren.</p></div>
+    <p class="note" id="not-android" hidden>Ordstriben findes kun til Android. Åbn denne side på din Android telefon: <b>qdigital.dk/ordstriben/test</b></p>
+  </div>
+</header>
+
+<main class="wrap">
+  <ol class="steps">
+    <li class="step" data-step="0">
+      <div class="head"><span class="num"><span>1</span></span><h2>Meld dig ind i testgruppen</h2></div>
+      <p>Brug den Google konto, der er på din telefon. Tryk på knappen, og tryk derefter på <b>Deltag i gruppen</b> hos Google.</p>
+      <a class="btn" data-done="0" href="https://groups.google.com/g/ordstriben-testere" target="_blank" rel="noopener">Åbn testgruppen</a>
+      <div class="ok">Godt. Fortsæt med trin 2.</div>
+    </li>
+    <li class="step" data-step="1">
+      <div class="head"><span class="num"><span>2</span></span><h2>Sig ja til at teste</h2></div>
+      <p>Tryk på knappen og derefter på <b>Bliv tester</b> hos Google Play. Står der, at siden ikke findes, så vent et par minutter og prøv igen.</p>
+      <a class="btn" data-done="1" href="https://play.google.com/apps/testing/dk.ordstriben.app" target="_blank" rel="noopener">Bliv tester</a>
+      <div class="ok">Godt. Fortsæt med trin 3.</div>
+    </li>
+    <li class="step" data-step="2">
+      <div class="head"><span class="num"><span>3</span></span><h2>Installér Ordstriben</h2></div>
+      <p>Tryk på knappen og derefter på <b>Installer</b> i Google Play. Åbn appen bagefter. Den viser dig selv resten.</p>
+      <a class="btn" data-done="2" href="https://play.google.com/store/apps/details?id=dk.ordstriben.app&amp;referrer=utm_source%3Dtestside" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 9-14 9z" fill="currentColor"/></svg>Åbn i Google Play</a>
+      <div class="ok">Tak fordi du tester. Fortæl os, hvad du synes, under Om og Send feedback i appen.</div>
+    </li>
+  </ol>
+  <button class="reset" id="reset" type="button" hidden>Start forfra</button>
+
+  <h3>Spørgsmål</h3>
+  <div class="faq">
+    <details>
+      <summary>Hvad koster det?</summary>
+      <p>Det er gratis at teste. Ordstriben er stadig under udvikling, så der kan være fejl, og appen bliver opdateret ofte.</p>
+    </details>
+    <details>
+      <summary>Hvad sker der med min tale?</summary>
+      <p>Talen omsættes til tekst på telefonen. Lyd og tekst sendes aldrig fra telefonen. Læs mere i <a href="../privatliv/">privatlivspolitikken</a>.</p>
+    </details>
+    <details>
+      <summary>Hvad kan andre se, når jeg er med i gruppen?</summary>
+      <p>Gruppen bruges kun til at give adgang til testen. Medlemmerne kan ikke se hinanden, og vi sender ikke mails til gruppen.</p>
+    </details>
+    <details>
+      <summary>Det virker ikke med min skolekonto</summary>
+      <p>Skolernes Google konti er ofte låst, så de ikke kan melde sig ind i grupper uden for skolen eller hente testversioner. Brug en privat Google konto, eller spørg skolens IT ansvarlige.</p>
+    </details>
+    <details>
+      <summary>Jeg er under 15 år</summary>
+      <p>Så spørg en forælder eller din lærer, før du melder dig til. Appen spørger, før den sender noget som helst, og du kan bare sige nej.</p>
+    </details>
+    <details>
+      <summary>Jeg kan ikke finde appen i Google Play</summary>
+      <ul>
+        <li>Tjek, at du er logget ind i Google Play med den samme konto, som du brugte i trin 1.</li>
+        <li>Har du flere konti, så skift konto øverst til højre i Google Play.</li>
+        <li>Det kan tage op til en time, før Google Play viser appen. Prøv trin 2 og 3 igen lidt senere.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Hvordan stopper jeg igen?</summary>
+      <p>Åbn linket i trin 2 og tryk <b>Forlad testprogrammet</b>, og forlad gruppen fra trin 1. Afinstallér appen, hvis du ikke vil beholde den.</p>
+    </details>
+    <details>
+      <summary>Hvor sender jeg ros, fejl og idéer?</summary>
+      <p>Det letteste er <b>Send feedback</b> under <b>Om</b> i appen. Den sender selv appens version med. Du kan også skrive til <a href="mailto:kontakt@qdigital.dk?subject=Ordstriben%20test">kontakt@qdigital.dk</a>.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap"><span>Ordstriben er lavet af <a href="/"><b>Q</b> Digital</a></span><span>CVR 46418840. Aabenraa, Danmark.</span></div></footer>
+
+<script>
+(function () {
+  var KEY = "ordstriben-test-trin";
+  var steps = document.querySelectorAll(".step");
+  var reset = document.getElementById("reset");
+  var done = [];
+  try { done = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { done = []; }
+
+  function show() {
+    var first = -1;
+    steps.forEach(function (s, i) {
+      var d = done.indexOf(i) >= 0;
+      s.classList.toggle("done", d);
+      if (!d && first < 0) first = i;
+    });
+    steps.forEach(function (s, i) { s.classList.toggle("later", first >= 0 && i > first); });
+    reset.hidden = done.length === 0;
+  }
+
+  document.querySelectorAll("[data-done]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      var i = Number(a.getAttribute("data-done"));
+      if (done.indexOf(i) < 0) done.push(i);
+      try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {}
+      setTimeout(show, 400);
+    });
+  });
+  reset.addEventListener("click", function () {
+    done = [];
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    show();
+  });
+
+  if (!/Android/i.test(navigator.userAgent)) document.getElementById("not-android").hidden = false;
+  show();
+})();
+</script>
+</body>
+</html>
