@@ -392,7 +392,8 @@ if ($method === 'GET') {
 }
 
 if ($method === 'DELETE') {
-    $id = $_GET['user'] ?? null;
+    // Id'et kan komme i en header, så det ikke havner i webserverens adgangslog.
+    $id = $_SERVER['HTTP_X_ORDSTRIBEN_USER'] ?? ($_GET['user'] ?? null);
     if (!valid_user($id)) reply(400, ['status' => 'user']);
     if (limited($dir, 'delete', MAX_DELETE_HOUR)) reply(429, ['status' => 'later']);
     $lock = lock_all($dir);

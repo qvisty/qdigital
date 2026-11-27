@@ -199,7 +199,8 @@ if ($method === 'GET') {
 }
 
 if ($method === 'DELETE') {
-    $id = $_GET['install'] ?? null;
+    // Id'et kan komme i en header, så det ikke havner i webserverens adgangslog.
+    $id = $_SERVER['HTTP_X_ORDSTRIBEN_INSTALL'] ?? ($_GET['install'] ?? null);
     if (!valid_install($id)) reply(400, ['status' => 'install']);
     if (limited($dir, 'delete', MAX_DELETE_HOUR)) reply(429, ['status' => 'later']);
     $lock = lock_all($dir);
