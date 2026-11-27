@@ -50,8 +50,11 @@ $app = preg_replace('/[^a-z0-9-]/', '', strtolower($clean($input['app'] ?? '', 3
 if (!isset(APP_KEYS[$app]) || !hash_equals(APP_KEYS[$app], $_SERVER['HTTP_X_APP_KEY'] ?? '')) {
     reply(403, ['ok' => false, 'error' => 'Unknown app']);
 }
-$types = ['feedback' => 'Feedback', 'feature' => 'Feature request', 'bug' => 'Bug report'];
-$type = $types[$input['type'] ?? ''] ?? 'Feedback';
+$danish = $app === 'ordstriben';
+$types = $danish
+    ? ['feedback' => 'Forslag til rettelse', 'feature' => 'Ny funktion', 'bug' => 'Fejl']
+    : ['feedback' => 'Feedback', 'feature' => 'Feature request', 'bug' => 'Bug report'];
+$type = $types[$input['type'] ?? ''] ?? $types['feedback'];
 $message = $clean($input['message'] ?? '', 5000);
 $email = $clean($input['email'] ?? '', 200);
 $version = $clean($input['version'] ?? '', 30);
@@ -60,11 +63,13 @@ $android = $clean($input['android'] ?? '', 10);
 if (mb_strlen($message) < 3) reply(400, ['ok' => false, 'error' => 'Message is empty']);
 if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) reply(400, ['ok' => false, 'error' => 'Invalid email']);
 
-$subject = '[' . (APP_NAMES[$app] ?? $app) . '] ' . $type . ($email !== '' ? '' : ' (no reply address)');
+$subject = '[' . (APP_NAMES[$app] ?? $app) . '] ' . $type
+    . ($email !== '' ? '' : ($danish ? ' (ingen svaradresse)' : ' (no reply address)'));
 $body = $message . "\n\n---\n"
     . 'App: ' . $app . ' ' . $version . "\n"
     . 'Android: ' . $android . "\n"
-    . 'Reply to: ' . ($email !== '' ? $email : 'not given') . "\n";
+    . ($danish ? 'Svar til: ' : 'Reply to: ')
+    . ($email !== '' ? $email : ($danish ? 'ikke oplyst' : 'not given')) . "\n";
 
 $headers = [
     'From: Q Digital apps <' . $config['smtp_user'] . '>',
