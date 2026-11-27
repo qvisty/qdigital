@@ -18,6 +18,7 @@ Kendte trinkort:
 | OS Status (Ordstriben) | https://claude.ai/artifact/XFcf1bC5BpQEu55xLLQCae |
 | HS Min-server, hjemmeserveren | https://claude.ai/artifact/8uVkqDVYphoo8jFBPmwsqd |
 | SEO Autopilot PRD og SaaS Pegasus setup (qvisty/seo-autopilot) | https://claude.ai/artifact/P5WvYyvb2j6mJWguGed8tB |
+| BT Finder (qvisty/bt-finder) | https://claude.ai/artifact/S7tZB8LLWJ6o4Gw1zJwHbu |
 
 ## Sådan får en session sit eget trinkort
 
