@@ -9,7 +9,7 @@ Search Console lists "Deceptive pages" with no example URLs, so we reviewed the 
 
 1. DNS had a wildcard record (*.qdigital.dk) that served our front page with a valid certificate on any made up subdomain. No subdomain was in use. We removed the wildcard on 28 November 2026, so only qdigital.dk and www.qdigital.dk now resolve to the website.
 2. All content is deployed automatically from our Git repository, and we reviewed the pages and scripts in it.
-3. The web hosting provider found no infected files, unknown subdomains or suspicious redirects (support ticket 862829).
+3. The web hosting provider checked the front page and the redirects and saw nothing suspicious (support ticket 862829).
 4. The web server logs for the last week show no unusual pages being served. Blocked traffic is vulnerability scanners looking for files we do not have.
 
 We believe the wildcard subdomains were the most likely reason for the warning. Please review the site again.
