@@ -3,7 +3,7 @@
 Sendes under Sikkerhed og manuelle handlinger, Sikkerhedsproblemer, knappen ANMOD OM GENNEMGANG. Skrevet 28. november 2026.
 
 ```
-qdigital.dk is the website of Q Digital, a sole proprietorship in Denmark (CVR 46418840). It presents our own Android apps and their privacy policies. The site is static HTML with a few small PHP endpoints that receive anonymous feedback and statistics from our own apps. It has no login forms for visitors, no downloads other than links to Google Play, and no third party scripts or ads.
+qdigital.dk is the website of Q Digital, a sole proprietorship in Denmark (CVR 46418840). It presents our own Android apps and their privacy policies. The site is static HTML with a few small PHP endpoints that receive anonymous feedback and statistics from our own apps. It has no downloads other than links to Google Play, and no third party scripts or ads. The only form with a password is a private admin page for the owner at /truckspotting/forslag/behandl/, which is excluded in robots.txt and added after the warning was first shown.
 
 Search Console lists "Deceptive pages" with no example URLs, so we reviewed the whole domain:
 
