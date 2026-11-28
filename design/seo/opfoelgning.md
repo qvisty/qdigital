@@ -76,4 +76,5 @@ Rapport ved hvert tjek:
 
 | Dato | Status | Kort |
 |---|---|---|
-| 28. november 2026 | 🔴 sikkerhed, 🟢 teknisk SEO | Plan sat op. Safe Browsing status 3 fra 5. november. Wildcard DNS fundet. Venter på skærmbillede af sikkerhedsrapporten. |
+| 28. november 2026 | 🔴 sikkerhed, 🟢 teknisk SEO | Plan sat op. Safe Browsing status 3 fra 5. november. Wildcard DNS fundet. |
+| 28. november 2026 | 🟡 sikkerhed | Jesper slettede `*` i DNS kl. 01.03. Search Console viser Vildledende sider uden eksempler på adresser ("Ikke relevant"), altså hele domænet. Tekst til anmodning om gennemgang ligger i design/seo/anmodning-om-gennemgang.md. |
